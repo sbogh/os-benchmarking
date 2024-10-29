@@ -46,12 +46,8 @@ void main_procCallOverhead()
             currArr[arrIter] = currArrPointer[arrIter];
         }
 
-
-        for(int j = 0; j < 8; j++)
-        {
-            string label = "Run " + to_string(i) + ": Procedure Call Overhead " + to_string(j) + " Variable";
-            cpu_results[label] = currArr;
-        }
+        string label = "Run " + to_string(i) + ": Procedure Call Overhead";
+        cpu_results[label] = currArr;
     }
     cout<<"Completed"<<endl;
 }
