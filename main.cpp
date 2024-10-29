@@ -1,5 +1,4 @@
 #include "cpu.cpp"
-#include <fstream>
 using namespace std;
 using json = nlohmann::json;
 #define MAIN_COUNTER 20
