@@ -10,6 +10,8 @@
 * keep in mind warming caches and manual loop unrolling
 */
 
+//using namespace std;
+
 double measureReadOverhead()
 {
     double total = 0; // total overhead ticks
@@ -19,15 +21,15 @@ double measureReadOverhead()
 
     for (int i = 0; i < LOOP_COUNT; i++)
     {
-        getCPUID(); // implement barrier before read clock call
+        getCPUID();
         measureInit = getTime();
         measureEnd = getTime();
-        getCPUID(); // barrier after read clock call
+        getCPUID();
 
         total = total + (measureEnd - measureInit); // add current loop time to total
     }
 
-    return ((double) total / double(LOOP_COUNT))
+    return ((double) total / double(LOOP_COUNT));
 }
 
 double measureLoopOverhead()
@@ -49,14 +51,14 @@ double measureLoopOverhead()
     measureEnd = getTime(); // end measurement
     getCPUID();
 
-    total = total + (measureEnd - measureStart); // assign count to var
+    total = total + (measureEnd - measureInit); // assign count to var
 
-    return ((double) total / (double) LOOP_COUNT)
+    return ((double) total / (double) LOOP_COUNT);
 }
 
-double measureProcedureCallOverhead()
+double* measureProcedureCallOverhead()
 {
-    double retArr[8]; //init array to store all info
+    static double retArr[8]; //init array to store all info
 
     // init in loop vals for time storage
     uint64_t measureInit;
@@ -181,6 +183,8 @@ double measureProcedureCallOverhead()
         loop_total = loop_total + (measureEnd - measureInit);
     }
     retArr[7] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    
+    return retArr;
 }
 
 double measureSystemCallOverhead()
@@ -204,7 +208,7 @@ double measureSystemCallOverhead()
         total = total + (measureEnd - measureInit); // add count to total
     }
 
-    return ((double) total / (double) CALL_COUNT)
+    return ((double) total / (double) CALL_COUNT);
 }
 
 double measureProcessCreationOverhead()
@@ -216,7 +220,7 @@ double measureProcessCreationOverhead()
 
     pid_t procID; // init process ID
 
-    for(i = 0; i < CALL_COUNT; i++)
+    for(int i = 0; i < CALL_COUNT; i++)
     {
         getCPUID();
         measureInit = getTime();
@@ -225,7 +229,7 @@ double measureProcessCreationOverhead()
 
         if (procID == 0)
         {
-            exit();
+            exit(1);
         } else 
         {
             wait(0);
@@ -258,20 +262,100 @@ double kernelThreadCreationOverhead()
         measureEnd = getTime();
         getCPUID();
 
-        total = total + (measureEnd - measureStart);
+        total = total + (measureEnd - measureInit);
     }
 
     return ((double) total / (double) CALL_COUNT);
 }
 
-/*
+double stddev_calc(double* array, double mean)
+{
+    double total_diff = 0;
+    for(int i = 0; i < CALL_COUNT; i++)
+    {
+        total_diff = total_diff + pow((array[i] - mean), 2);
+    }
+
+    return sqrt((double) total_diff / (double) CALL_COUNT);
+}
+
 double processContextSwitch()
 {
+    int fd[2]; // initialize array of two file descriptors
+    pipe(fd); // open pipe
 
+    static double valArr[CALL_COUNT]; // init total overhead
+    double total = 0;
+
+    for(int i = 0; i < CALL_COUNT;)
+    {
+        uint64_t measureInit, measureEnd; // init timestamp vars
+        pid_t procID; // init process ID
+        int sizeVal = sizeof(uint64_t); // init size val for read
+
+        procID = fork(); // fork process
+        
+        // conditions to run in child versus parent
+        if (procID != 0) // parent process
+        {
+            getCPUID();
+            measureInit = getTime();
+
+            wait(NULL);
+            read(fd[0], (void*) &measureEnd, sizeVal);
+        } 
+        else // child process
+        {
+            measureEnd = getTime();
+            getCPUID();
+
+            write(fd[1], (void*) &measureEnd, sizeVal); // write(file descriptor, buffer, size)
+            exit(1); // exit 
+        }
+
+        double loopTotal = (measureEnd > measureInit) ? (measureEnd - measureInit) : 0; // if diff > 0 assign val otherwise assign 0
+
+        // if val not 0 add to total and increment
+        if (loopTotal != 0)
+        {
+            valArr[i] = loopTotal; // assign ith context switch measurement to array
+            total = total + loopTotal;
+            i++; // increment loop counter
+        }
+    }
+
+    return ((double) total / (double) CALL_COUNT); // return array of context switch values
 }
 
 double threadContextSwitch()
 {
+    static double retArr[CALL_COUNT]; // init return array with overhead array
+    double total = 0;
+    for(int i = 0; i < CALL_COUNT;)
+    {
+        uint64_t measureInit, measureEnd; //init timestamp vars
+        int sizeVal = sizeof(uint64_t); // init size value to pass to read()
 
+        pthread_t threadID; // init thread
+
+        pipe(fd); // open pipe
+        pthread_create(&threadID, NULL, threadCSFunc, NULL); // create thread
+
+        getCPUID(); // blocking
+        measureInit = getTime(); // get start time
+        pthread_join(threadID, NULL); // join thread
+        read(fd[0], (void*) &measureEnd, sizeVal); // read(file descriptor, buffer, size)
+
+        double loopTotal = (measureEnd > measureInit) ? (measureEnd - measureInit) : 0; // assign diff of timestamp, if < 0 assign 0
+
+        // check if current loop output is valid and increment if it is (diff not equal to 0 meaning > 0)
+        if (loopTotal != 0)
+        {
+            retArr[i] = loopTotal; // assign loop val to array index i
+            total = total + loopTotal;
+            i++; // increment loop counter
+        }
+    }
+
+    return ((double) total / (double) CALL_COUNT); // return the array of context switch values
 }
-*/

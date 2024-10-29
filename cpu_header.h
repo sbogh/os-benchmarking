@@ -3,15 +3,22 @@ CPU Header File
 */
 #include <cstdlib>
 #include <cstdint>
-#include <intrin.h>
+#include <x86intrin.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <pthread.h>
+#include <iostream>
+#include <wait.h>
+#include "json.hpp"
+#include <string>
+#include <cmath>
 
 #pragma intrinsic(__rdtsc)
 
-#define LOOP_COUNT = 100000
-#define CALL_COUNT = 250
+#define LOOP_COUNT 100000
+#define CALL_COUNT 250
+
+static int fd[2];
 
 
 void getCPUInfo()
@@ -20,22 +27,16 @@ void getCPUInfo()
     system("lscpu");
 }
 
-static inline void getCPUID()
+void getCPUID()
 {
-    // inline assembly to barrier for calls
-    __asm__ __volatile__ ("CPUID\n\t")
+    __asm__ __volatile__ ("cpuid");
 }
 
 static inline uint64_t getTime()
 { 
-    // define high and low variable
-    uint32_t cycles_high, cycles_low;
-
-    // inline assembly to pull cycle vals
-    __asm__ __volatile__ ("rdtsc" : "=a" (cycles_low), "=d" (cycles_high));
-
+    unsigned int ui;
     // return cycle count
-    return ((uint64_t)cycles_high << 32) | cycles_low;
+    return __rdtscp(&ui);
 }
 
 static inline void zeroVars(){}
@@ -54,7 +55,20 @@ static inline void sixVars(int one, int two, int three, int four, int five, int 
 
 static inline void sevenVars(int one, int two, int three, int four, int five, int six, int seven){}
 
-void* arbFunc(void* arg)
+static inline void* arbFunc(void* arg)
 {
+    pthread_exit(NULL);
+}
+
+static inline void *threadCSFunc(void *)
+{
+    uint64_t measureInit;
+
+    getCPUID();
+    measureInit = getTime();
+    int sizeVal = sizeof(uint64_t);
+
+    write(fd[1], (void*) &measureInit, sizeVal);
+
     pthread_exit(NULL);
 }
