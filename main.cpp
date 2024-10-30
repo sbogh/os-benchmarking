@@ -1,3 +1,9 @@
+/* 
+* @file cpu.h
+* @author Shayan Boghani
+*
+* CPU Header
+ */
 #include "cpu.cpp"
 using namespace std;
 using json = nlohmann::json;
@@ -48,6 +54,20 @@ void main_procCallOverhead()
         string label = "Run " + to_string(i) + ": Procedure Call Overhead";
         cpu_results[label] = currArr;
     }
+    cout<<"Completed"<<endl;
+}
+
+void main_systemCallOverhead()
+{
+    cout<<"Measure System Call Overhead"<<endl;
+    double measureLoopOut[10];
+
+    for(int i = 0; i < 10; i++)
+    {
+        measureLoopOut[i] = measureSystemCallOverhead();
+    }
+
+    cpu_results["System Call Overhead"] = measureLoopOut;
     cout<<"Completed"<<endl;
 }
 
@@ -131,6 +151,9 @@ int main()
 
     // PROCEDURE CALL OVERHEAD
     main_procCallOverhead();
+
+    // SYSTEM CALL OVERHEAD
+    main_systemCallOverhead();
 
     // PROCEDURE CREATION OVERHEAD
     main_procCreationOverhead();

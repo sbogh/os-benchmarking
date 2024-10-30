@@ -6,10 +6,6 @@
 * CPU Module
  */
 
-/*
-* keep in mind warming caches and manual loop unrolling
-*/
-
 /**
  * CPU Operation 1a-1: Measure overhead of reading time
  * 

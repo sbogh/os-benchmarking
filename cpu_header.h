@@ -1,6 +1,9 @@
-/*
-CPU Header File
-*/
+/* 
+* @file cpu.h
+* @author Shayan Boghani
+*
+* CPU Header
+ */
 
 #ifndef CPU_HEADER_H
 #define CPU_HEADER_H
