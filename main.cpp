@@ -7,7 +7,6 @@
 #include "cpu.cpp"
 using namespace std;
 using json = nlohmann::json;
-#define MAIN_COUNTER 20
 
 json cpu_results; // initialize json structure
 

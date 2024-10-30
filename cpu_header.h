@@ -29,14 +29,6 @@
 static int fd[2]; // global file descriptor
 
 /**
- * Get CPU information
- */
-void getCPUInfo()
-{
-    system("lscpu"); // read CPU Info
-}
-
-/**
  * Get CPU ID to implement serialization
  */
 void getCPUID()
