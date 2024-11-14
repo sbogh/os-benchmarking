@@ -213,21 +213,16 @@ double memory_pageFaultServTime()
     uint64_t measureEnd;
     double totTime = 0;
 
-    // initialize file name and get fd
+    // initialize file name, get fd, and adjust size of file
     const char* file = "dummy";
     int fd = get_fd(file);
+    ftruncate(fd, DUMMY_SIZE);
 
     // perform memory mapping
-    char* pageMap = (char *) mmap(0, DUMMY_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); // map dummy file of DUMMY_SIZE to mem, can read and write mapping, no offset
-    
-    // check to make sure memory mapping succeeded, else continue to attempt to map until success
-    while (pageMap == MAP_FAILED)
-    {
-        char* pageMap = (char *) mmap(0, DUMMY_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); // map dummy file of DUMMY_SIZE to mem, can read and write mapping, no offset
-    }
+    char* pageMap = (char *) mmap(nullptr, DUMMY_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); // map dummy file of DUMMY_SIZE to mem, can read and write mapping, no offset
 
     // conduct page fault timing
-    for(int i = 0; i < 512; i++)
+    for(int i = 0; i < PAGE_FAULT_LOOP_COUNT; i++)
     {
         // get timestamp
         getCPUID(); // force serialization
@@ -239,11 +234,11 @@ double memory_pageFaultServTime()
         measureEnd = getTime(); // force serialization
         getCPUID(); // get end time
 
-        totTime += (double)(measureEnd - measureInit); // add loop time to total time
+        totTime += (double)(measureEnd - measureInit - 6); // add loop time to total time while adjusting for read overhead (from CPU ops)
     }
 
-    totTime = totTime / 3000; // convert cycles to ns
-    double avgTime = totTime / 512; // average over pages accessed
+    totTime = totTime / 3; // convert cycles to ns
+    double avgTime = totTime / PAGE_FAULT_LOOP_COUNT; // average over pages accessed
 
     // Clean up (unmap memory and close file descriptor)
     munmap(pageMap, DUMMY_SIZE);

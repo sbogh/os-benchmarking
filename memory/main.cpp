@@ -86,15 +86,15 @@ int main()
     main_memoryAccess();
 
     // READ MEMORY BANDWIDTH
-    //main_memoryBW_Read();
+    main_memoryBW_Read();
 
     // WRITE MEMORY BANDWIDTH
-    //main_memoryBW_Write();
+    main_memoryBW_Write();
 
     // PAGE FAULT SERVICE TIME
-    //main_memoryPageFault();
+    main_memoryPageFault();
 
     // Write results to json file
-    //write_json();
+    write_json();
 }
 

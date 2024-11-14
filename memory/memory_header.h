@@ -27,9 +27,10 @@
 #pragma intrinsic(__rdtsc)
 using namespace std;
 
-#define int LOOP_COUNT = 1000000 // num loops
+#define LOOP_COUNT 1000000 // num loops
+#define PAGE_FAULT_LOOP_COUNT 10000 // num loops for page fault
 #define size_t PAGE_SIZE = (size_t) sysconf (_SC_PAGESIZE) // get page size
-const int DUMMY_SIZE = PAGE_SIZE * 512; // file size of 512 pages
+const int DUMMY_SIZE = PAGE_SIZE * 512 * 1000; // file size
 
 
 vector<int> sizes = {4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864}; // L1: 80 KiB = 81920 bytes, L2: 1.3 MiB = 1363148.8 bytes, L3: 12 MiB = 12582912 bytes
@@ -78,7 +79,7 @@ static std::vector<int>& get_array(int size)
  */
 static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
 {
-    return ((double) (measureEnd - measureInit) / 3000);
+    return ((double) (measureEnd - measureInit) / 3);
 }
 
 /**
@@ -89,7 +90,7 @@ static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
  */
 static int get_fd(const char* file)
 {
-    int fd = open(file, O_CREAT | O_RDWR); // create file using filename and size
+    int fd = open(file, O_RDWR); // open file using filename
     if (fd < 0) {
         return -1;
     }
