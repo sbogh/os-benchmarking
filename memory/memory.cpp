@@ -78,13 +78,57 @@ double memory_accessTime(int size)
     return ((double)(measureEnd - measureInit) / (double) arraySize); // return average time per access
 }
 
+struct Node {
+	int data;
+	Node* next = nullptr;
+};
+
+double memory_accessTime_LL(int size)
+{
+    uint64_t measureInit;
+    uint64_t measureEnd;
+    Vector<Node> linkedList(size);
+
+    Vector<Node*> pointers(size);
+    for(int i = 0; i < size; i++)
+    {
+        pointers[i] = &linkedList[i];
+    }
+
+    random_shuffle(begin(pointers), end(pointers));
+
+    for(int i = 0; i < size - 1; i++)
+    {
+        pointers[i]->next = pointers[i + 1];
+    }
+
+    Node* head = pointers[0];
+    Node* temp = head;
+
+    CPUID();
+    measureInit = getTime();
+
+    for(int i = 0; i < size; i++)
+    {
+        temp = temp->next;
+    }
+
+    measureEnd = getTime();
+    CPUID();
+
+    double clock_time = cyclesToTime(measureInit, measureEnd);
+
+    return (double) clock_time / (double) size;
+}
+
+
 /**
  * Memory Operation 2a: RAM Bandwidth Read
  * 
  * @return double with bandwidth in GB/s
  */
-__attribute__((optimize("no-tree-vectorize"))); // force optimizer to not vectorize loop instructions for this function
-double memory_bandwidthRead(int size)
+// force optimizer to not vectorize loop instructions for this function
+extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidthRead(int size)
 {
     // initialize array and time measurement vars
     vector<int> genArr = get_array(size / sizeof(int));
@@ -123,8 +167,8 @@ double memory_bandwidthRead(int size)
  * 
  * @return double with bandwidth in GB/s
  */
-__attribute__((optimize("no-tree-vectorize"))); // force optimizer to not vectorize loop instructions for this function
-double memory_bandwidthWrite()
+// force optimizer to not vectorize loop instructions for this function
+extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidthWrite(int size)
 {
     // initialize array and time measurement vars
     vector<int> genArr = get_array(size / sizeof(int));

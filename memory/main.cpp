@@ -14,13 +14,13 @@ json mem_results; // initialize json structure
 void main_memoryAccess()
 {
     cout<<"Beginning memory access latency test..."<<endl;
-    for (i : sizes)
+    for (int i : sizes)
     {
         double latency_curr = memory_accessTime(i); // get access latency for specified array size
 
         string header = "Memory Access Latency: " + to_string(i) + " bytes"; // json key
         mem_results[header] = latency_curr; // store latency in json
-        cout<<"Completed" + header + " - " + to_string(latency_curr)<<endl;
+        cout<<"Completed " + header + " - " + to_string(latency_curr)<<endl;
     }
     cout<<"Completed memory access latency test"<<endl;
 }
@@ -28,7 +28,7 @@ void main_memoryAccess()
 void main_memoryBW_Write()
 {
     cout<<"Beginning memory write bandwidth test..."<<endl;
-    for (i : bandwidth_sizes)
+    for (int i : bandwidth_sizes)
     {
         double curr_bw = memory_bandwidthWrite(i); // get write bandwidth for specified array size
 
@@ -43,7 +43,7 @@ void main_memoryBW_Write()
 void main_memoryBW_Read()
 {
     cout<<"Beginning memory read bandwidth test..."<<endl;
-    for (i : bandwidth_sizes)
+    for (int i : bandwidth_sizes)
     {
         double curr_bw = memory_bandwidthRead(i); // get read bandwidth for specified array size
 

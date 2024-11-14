@@ -22,17 +22,18 @@
 #include <fstream>
 #include <vector>
 #include <sys/mman.h>
+#include <fcntl.h>
 
 #pragma intrinsic(__rdtsc)
 using namespace std;
 
-#define LOOP_COUNT = 1000000 // num loops
+#define int LOOP_COUNT = 1000000 // num loops
 #define size_t PAGE_SIZE = (size_t) sysconf (_SC_PAGESIZE) // get page size
-#define DUMMY_SIZE = PAGE_SIZE * 512; // file size of 512 pages
+const int DUMMY_SIZE = PAGE_SIZE * 512; // file size of 512 pages
 
 
-#define vector<int> sizes = {4, 16, 64, 256, 1024, 4096, 16384, 65536, 262144, 1048576, 4194304, 16777216} // L1: 70 KiB = 71680 bytes, L2: 1.3 MiB = 1363148.8 bytes, L3: 12 MiB = 12582912 bytes
-#define vector<int> bandwidth_sizes = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864}; // 2^10 to 2^26 bytes
+vector<int> sizes = {4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864}; // L1: 80 KiB = 81920 bytes, L2: 1.3 MiB = 1363148.8 bytes, L3: 12 MiB = 12582912 bytes
+vector<int> bandwidth_sizes = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864}; // 2^10 to 2^26 bytes
 
 /**
  * Get CPU ID to implement serialization
