@@ -78,11 +78,12 @@ double memory_accessTime(int size)
     return ((double)(measureEnd - measureInit) / (double) arraySize); // return average time per access
 }
 
-struct Node {
-	int data;
-	Node* next = nullptr;
-};
-
+/**
+ * Memory Operation 1-ALTERNATE: Individual Integer Access -> L1, L2, L3 Caches and Main Memory using LL implementation
+ * 
+ * @param size the size of the desired array
+ * @return double with average latency per loop
+ */
 double memory_accessTime_LL(int size)
 {
     uint64_t measureInit;
@@ -243,6 +244,10 @@ double memory_pageFaultServTime()
 
     totTime = totTime / 3000; // convert cycles to ns
     double avgTime = totTime / 512; // average over pages accessed
+
+    // Clean up (unmap memory and close file descriptor)
+    munmap(pageMap, DUMMY_SIZE);
+    close(fd);
 
     return (double) avgTime; // return averaged time
 }
