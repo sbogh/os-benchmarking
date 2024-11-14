@@ -43,12 +43,12 @@ What needs to be done
  * Memory Operation 1: Individual Integer Access -> L1, L2, L3 Caches and Main Memory
  * 
  * @param size the size of the desired array
- * @return double with average time per loop
+ * @return double with average latency per loop
  */
 double memory_accessTime(int size)
 {
     // initialize array and time measurement vars
-    vector<int> genArr = get_array(size);
+    vector<int> genArr = get_array(size / sizeof(int)); // convert size in bytes to array size (sizeof(int) == 4)
     uint64_t measureInit;
     uint64_t measureEnd;
 
@@ -81,19 +81,19 @@ double memory_accessTime(int size)
 /**
  * Memory Operation 2a: RAM Bandwidth Read
  * 
- * @return double with average time per loop
+ * @return double with bandwidth in GB/s
  */
+__attribute__((optimize("no-tree-vectorize"))); // force optimizer to not vectorize loop instructions for this function
 double memory_bandwidthRead(int size)
 {
     // initialize array and time measurement vars
-    vector<int> genArr = get_array(size);
+    vector<int> genArr = get_array(size / sizeof(int));
     uint64_t measureInit;
     uint64_t measureEnd;
 
     long long int dummy; // dummy variable to ensure optimizer does not erase accesses
     int arraySize = genArr.size(); // size of array
 
-    #pragma GCC novector; // force optimizer to not vectorize loop instructions
     // read timestamp
     getCPUID(); // force serialization
     measureInit = getTime(); // read start time
@@ -121,17 +121,17 @@ double memory_bandwidthRead(int size)
 /**
  * Memory Operation 2b: RAM Bandwidth Write
  * 
- * @return double with average time per loop
+ * @return double with bandwidth in GB/s
  */
+__attribute__((optimize("no-tree-vectorize"))); // force optimizer to not vectorize loop instructions for this function
 double memory_bandwidthWrite()
 {
     // initialize array and time measurement vars
-    vector<int> genArr = get_array(size);
+    vector<int> genArr = get_array(size / sizeof(int));
     uint64_t measureInit;
     uint64_t measureEnd;
     int arraySize = genArr.size(); // size of array
 
-    #pragma GCC novector; // force optimizer to not vectorize loop
     // read timestamp
     getCPUID();
     measureInit = getTime(); // get start time
@@ -159,9 +159,46 @@ double memory_bandwidthWrite()
 /**
  * Memory Operation 3: Page Fault Service Time
  * 
- * @return double with average time per loop
+ * @return double with average time per page fault
  */
 double memory_pageFaultServTime()
 {
+    // initialize time vars and average time holder
+    uint64_t measureInit;
+    uint64_t measureEnd;
+    double totTime = 0;
 
+    // initialize file name and get fd
+    const char* file = "dummy";
+    int fd = get_fd(file);
+
+    // perform memory mapping
+    char* pageMap = (char *) mmap(0, DUMMY_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); // map dummy file of DUMMY_SIZE to mem, can read and write mapping, no offset
+    
+    // check to make sure memory mapping succeeded, else continue to attempt to map until success
+    while (pageMap == MAP_FAILED)
+    {
+        char* pageMap = (char *) mmap(0, DUMMY_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0); // map dummy file of DUMMY_SIZE to mem, can read and write mapping, no offset
+    }
+
+    // conduct page fault timing
+    for(int i = 0; i < 512; i++)
+    {
+        // get timestamp
+        getCPUID(); // force serialization
+        measureInit = getTime(); // get start time
+
+        pageMap[i * PAGE_SIZE] = 0; // access page i (offset by size of page)
+
+        // get timestamp
+        measureEnd = getTime(); // force serialization
+        getCPUID(); // get end time
+
+        totTime += (double)(measureEnd - measureInit); // add loop time to total time
+    }
+
+    totTime = totTime / 3000; // convert cycles to ns
+    double avgTime = totTime / 512; // average over pages accessed
+
+    return (double) avgTime; // return averaged time
 }
