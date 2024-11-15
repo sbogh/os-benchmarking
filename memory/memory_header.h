@@ -23,11 +23,14 @@
 #include <vector>
 #include <sys/mman.h>
 #include <fcntl.h>
+#include <algorithm>
+#include <random>
 
 #pragma intrinsic(__rdtsc)
 using namespace std;
 
 #define LOOP_COUNT 1000000 // num loops
+#define MEM_ACCESS_COUNT 1000 // num loops for memory access
 #define PAGE_FAULT_LOOP_COUNT 10000 // num loops for page fault
 #define size_t PAGE_SIZE = (size_t) sysconf (_SC_PAGESIZE) // get page size
 const int DUMMY_SIZE = PAGE_SIZE * 512 * 1000; // file size
@@ -36,9 +39,10 @@ const int DUMMY_SIZE = PAGE_SIZE * 512 * 1000; // file size
 vector<int> sizes = {4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864}; // L1: 80 KiB = 81920 bytes, L2: 1.3 MiB = 1363148.8 bytes, L3: 12 MiB = 12582912 bytes
 vector<int> bandwidth_sizes = {1024, 2048, 4096, 8192, 16384, 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4194304, 8388608, 16777216, 33554432, 67108864}; // 2^10 to 2^26 bytes
 
+// Node structure for Linked List for memory integer access latency benchmark
 struct Node {
-	int data;
-	Node* next = nullptr;
+	int data; // data value for node
+	Node* next = nullptr; // next pointer for node
 };
 
 /**
@@ -79,7 +83,7 @@ static std::vector<int>& get_array(int size)
  */
 static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
 {
-    return ((double) (measureEnd - measureInit) / 3);
+    return ((double) (measureEnd - measureInit) / 3); // divide by processor frequency
 }
 
 /**

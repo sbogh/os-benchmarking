@@ -16,11 +16,18 @@ void main_memoryAccess()
     cout<<"Beginning memory access latency test..."<<endl;
     for (int i : sizes)
     {
-        double latency_curr = memory_accessTime(i); // get access latency for specified array size
+        double latency_avg = 0;
+        for(int j = 0; j < MEM_ACCESS_COUNT; j++)
+        {
+            double latency_curr = memory_accessTime(i); // get access latency for specified array size
+            latency_avg += latency_curr;
+        }
+        
+        latency_avg /= MEM_ACCESS_COUNT;
 
         string header = "Memory Access Latency: " + to_string(i) + " bytes"; // json key
-        mem_results[header] = latency_curr; // store latency in json
-        cout<<"Completed " + header + " - " + to_string(latency_curr)<<endl;
+        mem_results[header] = latency_avg; // store latency in json
+        cout<<"Completed " + header + " - " + to_string(latency_avg)<<endl;
     }
     cout<<"Completed memory access latency test"<<endl;
 }
@@ -58,12 +65,12 @@ void main_memoryPageFault()
 {
     cout<<"Beginning memory page fault service test..."<<endl;
 
-    double defTime = 0;
+    double defTime = 0; // initialize variable to store total time taken
 
     for(int i = 0; i < 100; i++)
     {
         double curr_time = memory_pageFaultServTime();
-        defTime += curr_time;
+        defTime += curr_time; // add current loop time to total
     }
 
     defTime /= 100; // average over 100 runs

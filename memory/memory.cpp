@@ -74,8 +74,10 @@ double memory_accessTime(int size)
     // perform end time read
     measureEnd = getTime(); // get timestamp
     getCPUID(); // force serialization
+
+    double clockTime = cyclesToTime(measureInit, measureEnd); // convert time from cycles to ns
     
-    return ((double)(measureEnd - measureInit) / (double) arraySize); // return average time per access
+    return ((double) time / (double) arraySize); // return average time per access
 }
 
 /**
@@ -86,40 +88,50 @@ double memory_accessTime(int size)
  */
 double memory_accessTime_LL(int size)
 {
+    // initialize time stamp variables and linked list vector
     uint64_t measureInit;
     uint64_t measureEnd;
-    Vector<Node> linkedList(size);
 
-    Vector<Node*> pointers(size);
+    Vector<Node> linkedList(size); // initialize vector of size with structure Node
+    Vector<Node*> pointers(size); // initialize vector to store pointers to Linked List Nodes
+
+    // for loop to assign the address of Linked List node to a pointer in the pointers list
     for(int i = 0; i < size; i++)
     {
         pointers[i] = &linkedList[i];
     }
 
-    random_shuffle(begin(pointers), end(pointers));
+    // shuffle pointers to ensure randomized order for Linked List
+    random_device randDev;
+    mt19937 g(randDev());
+    shuffle(begin(pointers), end(pointers), g);
 
+    // create Linked List by assigning next pointer to a random node (based on shuffling done above)
     for(int i = 0; i < size - 1; i++)
     {
         pointers[i]->next = pointers[i + 1];
     }
 
-    Node* head = pointers[0];
-    Node* temp = head;
+    Node* head = pointers[0]; // define the head of the Linked List
+    Node* temp = head; // create a pointer that points to head
 
-    CPUID();
-    measureInit = getTime();
+    // get timestamp
+    CPUID(); // force serialization
+    measureInit = getTime(); // get start time
 
+    // access every Node in the entire Linked List
     for(int i = 0; i < size; i++)
     {
         temp = temp->next;
     }
 
-    measureEnd = getTime();
-    CPUID();
+    // get timestamp
+    measureEnd = getTime(); // get end time
+    CPUID(); // force serialization
 
-    double clock_time = cyclesToTime(measureInit, measureEnd);
+    double clock_time = cyclesToTime(measureInit, measureEnd); // convert time from cycles to ns
 
-    return (double) clock_time / (double) size;
+    return (double) clock_time / (double) size; // return averaged time in ns per access
 }
 
 
@@ -142,6 +154,7 @@ extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidt
     // read timestamp
     getCPUID(); // force serialization
     measureInit = getTime(); // read start time
+
     // for loop running for desired loop count
     for(int i = 0; i < LOOP_COUNT; i++)
     {
@@ -158,7 +171,7 @@ extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidt
 
     // unit conversions from ns -> s and bytes -> GB
     double wallClockTime = cyclesToTime(measureInit, measureEnd) / pow(10, 9); // seconds
-    double dataGB = (double)(sizeof(int) * 5 * LOOP_COUNT) / pow(1024, 3); // GB
+    double dataGB = (double)(sizeof(int) * 5 * LOOP_COUNT) / pow(1000, 3); // GB
 
     return ((double) dataGB / (double) wallClockTime); // return GB/s
 }
@@ -180,6 +193,7 @@ extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidt
     // read timestamp
     getCPUID();
     measureInit = getTime(); // get start time
+
     // for loop running for desired loop count
     for(int i = 0; i < LOOP_COUNT; i++)
     {
@@ -190,6 +204,7 @@ extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidt
         genArr[((i * 16) + 3) % arraySize] = 0;
         genArr[((i * 16) + 4) % arraySize] = 0;
     }
+
     // read timestamp
     measureEnd = getTime(); // get end time
     getCPUID();
@@ -228,7 +243,7 @@ double memory_pageFaultServTime()
         getCPUID(); // force serialization
         measureInit = getTime(); // get start time
 
-        pageMap[i * PAGE_SIZE] = 0; // access page i (offset by size of page)
+        pageMap[(i * PAGE_SIZE) % DUMMY_SIZE] = 0; // access page i (offset by size of page)
 
         // get timestamp
         measureEnd = getTime(); // force serialization
