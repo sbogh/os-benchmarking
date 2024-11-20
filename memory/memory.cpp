@@ -67,6 +67,7 @@ double memory_accessTime(int size)
     measureInit = getTime(); // get timestamp
 
     // for loop on length of array
+    // look into volatile
     for(int i = 0; i < arraySize; i++)
     {
         dummy = genArr[(i * 16) % arraySize]; // stride of 16 added to ensure prefetching does not influence, mod added to prevent out of bounds error
@@ -156,14 +157,13 @@ extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidt
     measureInit = getTime(); // read start time
 
     // for loop running for desired loop count
-    for(int i = 0; i < LOOP_COUNT; i++)
+    for(int i = 0; i < LOOP_COUNT; i += 64)
     {
-        // 5 reads from array that are added to dummy var (stride set to 16 to mitigate prefetching effects)
-        dummy = dummy + genArr[(i * 16) % arraySize];
-        dummy = dummy + genArr[((i * 16) + 1) % arraySize];
-        dummy = dummy + genArr[((i * 16) + 2) % arraySize];
-        dummy = dummy + genArr[((i * 16) + 3) % arraySize];
-        dummy = dummy + genArr[((i * 16) + 4) % arraySize];
+        // 4 reads from array that are added to dummy var (1 instruction per cache line)
+        dummy = dummy + genArr[(i + (16)) % arraySize];
+        dummy = dummy + genArr[(i + (16 * 2)) % arraySize];
+        dummy = dummy + genArr[(i + (16 * 3)) % arraySize];
+        dummy = dummy + genArr[(i + (16 * 4)) % arraySize];
     }
     // read timestamp
     measureEnd = getTime(); // get end time
@@ -171,7 +171,7 @@ extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidt
 
     // unit conversions from ns -> s and bytes -> GB
     double wallClockTime = cyclesToTime(measureInit, measureEnd) / pow(10, 9); // seconds
-    double dataGB = (double)(sizeof(int) * 5 * LOOP_COUNT) / pow(1000, 3); // GB
+    double dataGB = (double)(CACHE_LINE_SIZE * 4 * (LOOP_COUNT / 64)) / pow(1000, 3); // GB
 
     return ((double) dataGB / (double) wallClockTime); // return GB/s
 }
@@ -195,14 +195,13 @@ extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidt
     measureInit = getTime(); // get start time
 
     // for loop running for desired loop count
-    for(int i = 0; i < LOOP_COUNT; i++)
+    for(int i = 0; i < LOOP_COUNT; i += 64)
     {
-        // 5 writes to the array that are added to dummy var (stride set to 16 to mitigate prefetching effects)
-        genArr[(i * 16) % arraySize] = 0;
-        genArr[((i * 16) + 1) % arraySize] = 0;
-        genArr[((i * 16) + 2) % arraySize] = 0;
-        genArr[((i * 16) + 3) % arraySize] = 0;
-        genArr[((i * 16) + 4) % arraySize] = 0;
+        // 4 writes to the array that are added to dummy var (1 instruction per cache line)
+        genArr[(i + (16)) % arraySize] = 0;
+        genArr[(i + (16 * 2)) % arraySize] = 0;
+        genArr[(i + (16 * 3)) % arraySize] = 0;
+        genArr[(i + (16 * 4)) % arraySize] = 0;
     }
 
     // read timestamp
@@ -211,7 +210,7 @@ extern "C" __attribute__((optimize("no-tree-vectorize"))) double memory_bandwidt
 
     // unit conversions from ns -> s and bytes -> GB
     double wallClockTime = cyclesToTime(measureInit, measureEnd) / pow(10, 9); //seconds
-    double dataGB = (double)(sizeof(int) * 5 * LOOP_COUNT) / pow(1024, 3); // GB
+    double dataGB = (double)(CACHE_LINE_SIZE * 4 * (LOOP_COUNT / 64)) / pow(1000, 3); // GB
 
     return ((double) dataGB / (double) wallClockTime); // return GB/s
 }

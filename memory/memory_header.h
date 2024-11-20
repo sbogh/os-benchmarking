@@ -32,7 +32,8 @@ using namespace std;
 #define LOOP_COUNT 1000000 // num loops
 #define MEM_ACCESS_COUNT 1000 // num loops for memory access
 #define PAGE_FAULT_LOOP_COUNT 10000 // num loops for page fault
-#define size_t PAGE_SIZE = (size_t) sysconf (_SC_PAGESIZE) // get page size
+#define CACHE_LINE_SIZE (size_t) sysconf(_SC_LEVEL1_DCACHE_LINESIZE) // size of cache line
+#define PAGE_SIZE (size_t) sysconf (_SC_PAGESIZE) // get page size
 const int DUMMY_SIZE = PAGE_SIZE * 512 * 1000; // file size
 
 
