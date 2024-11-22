@@ -1,5 +1,5 @@
 /* 
-* @file memory.h
+* @file memory_header.h
 * @author Shayan Boghani
 *
 * Memory Header
