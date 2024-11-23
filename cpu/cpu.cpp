@@ -313,9 +313,6 @@ double stddev_calc(double* array, double mean)
  */
 double processContextSwitch()
 {
-    int fd[2]; // initialize array of two file descriptors
-    pipe(fd); // open pipe
-
     static double valArr[CALL_COUNT]; // init total overhead
     double total = 0; // init total var
 
@@ -324,6 +321,9 @@ double processContextSwitch()
         uint64_t measureInit, measureEnd; // init timestamp vars
         pid_t procID; // init process ID
         int sizeVal = sizeof(uint64_t); // init size val for read
+
+        int fd[2]; // initialize array of two file descriptors
+        pipe(fd); // open pipe
 
         procID = fork(); // fork process
 
