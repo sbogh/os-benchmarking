@@ -88,4 +88,14 @@ static inline void *threadCSFunc(void *)
     pthread_exit(NULL); // exit thread
 }
 
+/**
+ * Convert clock cycle measurements to nanoseconds (aka wall clock measurements)
+ * 
+ * @return Unsigned 64-bit int of cycles
+ */
+static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
+{
+    return ((double) (measureEnd - measureInit) / 3); // divide by processor frequency
+}
+
 #endif
