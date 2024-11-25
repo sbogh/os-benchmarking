@@ -23,8 +23,10 @@
 #include <vector>
 #include <sys/mman.h>
 #include <fcntl.h>
-#include <algorithm>
-#include <random>
+#include <string>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netinet/in.h>
 
 #pragma intrinsic(__rdtsc)
 using namespace std;
@@ -58,6 +60,29 @@ static inline uint64_t getTime()
 static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
 {
     return ((double) (measureEnd - measureInit) / 3); // divide by processor frequency
+}
+
+/**
+ * Create socket
+ * 
+ * @return Unsigned 64-bit int of cycles
+ */
+static inline int createSocket()
+{
+    return socket(AF_NET, SOCK_STREAM, 0);
+}
+
+/**
+ * Assign socket fields
+ * @return socketAddr struct
+ */
+static inline sockaddr_in assignSocketFields(sockaddr_in socket, string connection, string port)
+{
+    socket.sin_family = AF_INET;
+    socket.sin_addr.s_addr = inet_addr(connection);
+    socket.sin_port = htons(atoi(port));
+
+    return socket;
 }
 
 
