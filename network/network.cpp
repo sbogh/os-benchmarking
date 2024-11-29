@@ -110,7 +110,7 @@ double network_RTT_client(string connection, int port)
     bzero(&server, sizeof(server));
 
     server.sin_family = AF_INET;   
-    inetpton(AF_INET, (PCWSTR) connection, &server.sin_addr.s_addr);
+    inet_pton(AF_INET, connection.c_str(), &server.sin_addr.s_addr);
     // handle error?
     server.sin_port = htons(port);
 
@@ -211,7 +211,8 @@ vector<double> network_peakBW_client(string connection, int port)
     memset(sendMsg, 'a', sizeof(sendMsg));
 
     uint64_t measureInit, measureEnd;
-    uint64_t totalTime = 0;
+    uint64_t totalUploadTime = 0;
+    uint64_t totalDownloadTime = 0;
     uint64_t totalUploadBytes = 0;
     uint64_t totalDownloadBytes = 0;
 
