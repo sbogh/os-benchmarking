@@ -69,14 +69,14 @@ void network_RTT_server(int port)
     int listenStatus = listen(socketFD, 5);
     // handle listenStatus != 0
 
-    int connectionFD = accept(socketFD, (struct sockaddr *) &client, sizeof(client));
+    int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) sizeof(client));
     // handle connectionFD == -1
 
     while(true)
     {
-        recv(connectionFD, dummyMsg, sizeof(dummyMsg), 0);
+        recv(connectionFD, &dummyMsg, sizeof(dummyMsg), 0);
         // handle receive error?
-        send(connectionFD, dummyMsg, len(dummyMsg), 0);
+        send(connectionFD, &dummyMsg, sizeof(dummyMsg), 0);
         // handle send error?
     }
 
@@ -122,9 +122,9 @@ double network_RTT_client(string connection, int port)
         getCPUID();
         measureInit = getTime();
 
-        send(socketFD, &dummyMsg, len(dummyMsg), 0);
+        send(socketFD, &dummyMsg, sizeof(dummyMsg), 0);
         // handle send error?
-        recv(socketFD, &dummyMsg, len(dummyMsg), 0);
+        recv(socketFD, &dummyMsg, sizeof(dummyMsg), 0);
         // handle receive error?
 
         measureEnd = getTime();
@@ -160,12 +160,10 @@ void network_peakBW_server(int port)
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
 
-    struct sockaddr_in server, client;
-
     bzero(&server, sizeof(server));
 
     server.sin_family = AF_INET;   
-    sever.sin_addr.s_addr = INADDR_ANY;
+    server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(port);
 
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
@@ -177,13 +175,13 @@ void network_peakBW_server(int port)
     int listenStatus = listen(socketFD, 5);
     // handle listenStatus != 0
 
-    int connectionFD = accept(socketFD, (struct sockaddr *) &client, sizeof(client));
+    int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) sizeof(client));
     // if using multithreading need to accept multiple
     // handle connectionFD == -1
 
     while(true)
     {
-        recv(connectionFD, recMsg, BANDWIDTH_BENCHMARK_SIZE, MSG_WAITALL);
+        recv(connectionFD, &recMsg, BANDWIDTH_BENCHMARK_SIZE, MSG_WAITALL);
         // handle receive error?
     }
 
@@ -195,7 +193,7 @@ void network_peakBW_server(int port)
  * @return double bandwidth value averaged over runs
  */
 // multithread this if need to hit higher bandwidth
-vector<int> network_peakBW_client(string connection, int port)
+vector<double> network_peakBW_client(string connection, int port)
 {
     /*
     - Init socket
@@ -217,19 +215,17 @@ vector<int> network_peakBW_client(string connection, int port)
     uint64_t totalUploadBytes = 0;
     uint64_t totalDownloadBytes = 0;
 
-    struct sockaddr_in server, client;
-
     bzero(&server, sizeof(server));
 
     server.sin_family = AF_INET;   
-    inetpton(AF_INET, (PCWSTR) connection, &server.sin_addr.s_addr)
+    inet_pton(AF_INET, connection.c_str(), &server.sin_addr.s_addr);
     // handle error?
     server.sin_port = htons(port);
 
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
     // handle error socketFD == -1
 
-    int connectionFD = connect(socketFD, (struct sockaddr *) &server, sizeof(server))
+    int connectionFD = connect(socketFD, (struct sockaddr *) &server, sizeof(server));
     // handle connectionFD == -1
 
     for(int i = 0; i < BW_LOOP_COUNT; i++)
@@ -237,7 +233,7 @@ vector<int> network_peakBW_client(string connection, int port)
         getCPUID();
         measureInit = getTime();
 
-        totalUploadBytes += send(connectionFD, sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
+        totalUploadBytes += send(connectionFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
         // handle receive error?
 
         measureEnd = getTime();
@@ -249,7 +245,7 @@ vector<int> network_peakBW_client(string connection, int port)
         getCPUID();
         measureInit = getTime();
 
-        totalDownloadBytes += recv(connectionFD, sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
+        totalDownloadBytes += recv(connectionFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
         // handle receive error?
 
         measureEnd = getTime();
@@ -302,7 +298,7 @@ double network_connectionOverhead_setup(string connection, int port)
 
     struct sockaddr_in server;
     server.sin_family = AF_INET;
-    inetpton(AF_INET, (PCWSTR) connection, &server.sin_addr.s_addr)
+    inet_pton(AF_INET, connection.c_str(), &server.sin_addr.s_addr);
     // handle error?
     server.sin_port = htons(port);
 
@@ -353,7 +349,7 @@ double network_connectionOverhead_teardown(string connection, int port)
     bzero(&server, sizeof(server));
 
     server.sin_family = AF_INET;
-    inetpton(AF_INET, (PCWSTR) connection, &server.sin_addr.s_addr)
+    inet_pton(AF_INET, connection.c_str(), &server.sin_addr.s_addr);
     // handle error?
     server.sin_port = htons(port);
 

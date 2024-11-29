@@ -74,7 +74,7 @@ static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
  */
 static inline int createSocket()
 {
-    return socket(AF_NET, SOCK_STREAM, 0);
+    return socket(AF_INET, SOCK_STREAM, 0);
 }
 
 /**
@@ -84,8 +84,8 @@ static inline int createSocket()
 static inline sockaddr_in assignSocketFields(sockaddr_in socket, string connection, string port)
 {
     socket.sin_family = AF_INET;
-    socket.sin_addr.s_addr = inet_addr(connection);
-    socket.sin_port = htons(atoi(port));
+    //socket.sin_addr.s_addr = inet_addr(connection);
+    //socket.sin_port = htons(atoi(port));
 
     return socket;
 }

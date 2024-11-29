@@ -26,7 +26,7 @@ void main_peakBW(int option)
 {
     if(option == 1) // client
     {
-        vector<int> bandwidths = network_peakBW_client(SERVER_IP, PORT);
+        vector<double> bandwidths = network_peakBW_client(SERVER_IP, PORT);
         cout<<"Peak Upload Bandwidth - " + to_string(bandwidths[0])<<endl;
         cout<<"Peak Download Bandwidth - " + to_string(bandwidths[1])<<endl;
     } else { // server
@@ -56,7 +56,7 @@ void main_connectionOverhead_teardown(int option)
     }
 }
 
-void main()
+int main()
 {
     int option = 1; // change to 1 if client, 0 if server
 
