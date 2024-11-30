@@ -1,15 +1,13 @@
 #include "network.cpp"
 /* 
-* @file main.cpp
+* @file main_localhost.cpp
 * @author Shayan Boghani
 *
 * Experiments for Network Module (main)
-* This file can act as the client and server side run file for remote operations.
-* For local operations this will act only as the SERVER side run file. See "main_localhost.cpp" for the
-* CLIENT side file to run in a separate terminal.
+* This file will be used to run the localhost CLIENT to do that set of benchmarks
  */
 
-#define SERVER_IP "192.168.1.219" // server VM IPv4
+#define SERVER_IP "127.0.0.1" // define localhost IP
 
 using namespace std;
 using json = nlohmann::json;
@@ -46,7 +44,7 @@ void main_connectionOverhead_setup(int option)
         double setUpAvg = network_connectionOverhead_setup(SERVER_IP, PORT);
         cout<<"Connection Set Up Overhead - " + to_string(setUpAvg)<<endl;
     } else { // server
-        network_connectionOverhead_server(PORT);
+        network_RTT_server(PORT);
     }
 }
 
@@ -57,7 +55,7 @@ void main_connectionOverhead_teardown(int option)
         double tearDownAvg = network_connectionOverhead_teardown(SERVER_IP, PORT);
         cout<<"Connection Tear Down Overhead - " + to_string(tearDownAvg)<<endl;
     } else { // server
-        network_connectionOverhead_server(PORT);
+        network_RTT_server(PORT);
     }
 }
 
@@ -71,6 +69,5 @@ int main()
 
     main_connectionOverhead_setup(option);
 
-    main_connectionOverhead_teardown(option); 
-    
+    main_connectionOverhead_teardown(option);
 }

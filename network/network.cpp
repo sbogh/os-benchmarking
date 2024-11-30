@@ -47,9 +47,11 @@ void network_RTT_server(int port)
         - Send/recv
     */
 
-    int socketFD;
+    int socketFD, clientLen;
     struct sockaddr_in server, client;
     char dummyMsg;
+
+    clientLen = sizeof(struct sockaddr_in);
 
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
@@ -69,14 +71,14 @@ void network_RTT_server(int port)
     int listenStatus = listen(socketFD, 5);
     // handle listenStatus != 0
 
-    int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) sizeof(client));
+    int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) clientLen);
     // handle connectionFD == -1
 
     while(true)
     {
-        recv(connectionFD, &dummyMsg, sizeof(dummyMsg), 0);
+        int recvStatus = recv(connectionFD, &dummyMsg, sizeof(dummyMsg), 0);
         // handle receive error?
-        send(connectionFD, &dummyMsg, sizeof(dummyMsg), 0);
+        int sendStatus = send(connectionFD, &dummyMsg, sizeof(dummyMsg), 0);
         // handle send error?
     }
 
@@ -168,6 +170,11 @@ void network_peakBW_server(int port)
 
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
     // handle error socketFD == -1
+    int opt = 1;
+    setsockopt(socketFD, SOL_SOCKET, SO_KEEPALIVE | SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+    int buffer_size = 1000*1000*250;
+    setsockopt(socketFD, SOL_SOCKET, SO_SNDBUF, &buffer_size, sizeof(buffer_size));
+    setsockopt(socketFD, SOL_SOCKET, SO_RCVBUF, &buffer_size, sizeof(buffer_size));
 
     int bindStatus = bind(socketFD, (struct sockaddr *) &server, sizeof(server));
     // handle bindStatus != 0
@@ -181,7 +188,7 @@ void network_peakBW_server(int port)
 
     while(true)
     {
-        recv(connectionFD, &recMsg, BANDWIDTH_BENCHMARK_SIZE, MSG_WAITALL);
+        recv(socketFD, &recMsg, BANDWIDTH_BENCHMARK_SIZE, MSG_WAITALL);
         // handle receive error?
     }
 
@@ -234,7 +241,7 @@ vector<double> network_peakBW_client(string connection, int port)
         getCPUID();
         measureInit = getTime();
 
-        totalUploadBytes += send(connectionFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
+        totalUploadBytes += send(socketFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
         // handle receive error?
 
         measureEnd = getTime();
@@ -246,7 +253,7 @@ vector<double> network_peakBW_client(string connection, int port)
         getCPUID();
         measureInit = getTime();
 
-        totalDownloadBytes += recv(connectionFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
+        totalDownloadBytes += recv(socketFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
         // handle receive error?
 
         measureEnd = getTime();
@@ -375,4 +382,52 @@ double network_connectionOverhead_teardown(string connection, int port)
     }
 
     return ((double) totalTime / (double) LOOP_COUNT);
+}
+
+/**
+ * Network Operations 3: Server-Side
+ * Use for set up and teardown on the server side
+ * @param port the port to listen on
+*/
+void network_connectionOverhead_server(int port)
+{
+    /*
+    - Init socket
+    - Apply server internet address settings
+    - Bind
+    - Listen
+    - Accept
+    - in loop
+        - Send/recv
+    */
+
+    int socketFD;
+    struct sockaddr_in server, client;
+    char dummyMsg;
+
+    uint64_t measureInit, measureEnd;
+    uint64_t totalTime = 0;
+
+    socketFD = socket(AF_INET, SOCK_STREAM, 0);
+    // handle error socketFD == -1
+
+    bzero(&server, sizeof(server));
+
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(port);
+
+    int bindStatus = bind(socketFD, (struct sockaddr *) &server, sizeof(server));
+    // handle bindStatus != 0
+
+    int listenStatus = listen(socketFD, 5);
+    // handle listenStatus != 0
+
+    while(true)
+    {
+        int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) sizeof(client));
+        // handle connectionFD == -1
+    }
+
+    close(socketFD);
 }

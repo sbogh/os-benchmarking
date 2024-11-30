@@ -34,7 +34,6 @@ using namespace std;
 #define LOOP_COUNT 1000000 // num loops
 #define BW_LOOP_COUNT 1000 // num loops for bandwidth calc
 #define BANDWIDTH_BENCHMARK_SIZE 1000000 // 1000000 bytes message
-#define SERVER_IP "192.168.1.219" // server VM IPv4
 #define PORT 8080 // chosen port
 
 
