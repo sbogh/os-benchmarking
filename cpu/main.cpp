@@ -22,6 +22,10 @@ void main_readOverhead()
     }
 
     cpu_results["Read Overhead"] = measureReadOut;
+
+    double stddev = calc_stddev(measureReadOut);
+    cout<<"Read Overhead Standard Deviation: " + to_string(stddev)<<endl;
+
     cout<<"Completed"<<endl;
 }
 
@@ -37,6 +41,10 @@ void main_loopOverhead()
     }
 
     cpu_results["Loop Overhead"] = measureLoopOut;
+
+    double stddev = calc_stddev(measureLoopOut);
+    cout<<"Loop Overhead Standard Deviation: " + to_string(stddev)<<endl;
+
     cout<<"Completed"<<endl;
 }
 
@@ -71,6 +79,10 @@ void main_systemCallOverhead()
     }
 
     cpu_results["System Call Overhead"] = measureLoopOut;
+
+    double stddev = calc_stddev(measureLoopOut);
+    cout<<"System Call Overhead Standard Deviation: " + to_string(stddev)<<endl;
+
     cout<<"Completed"<<endl;
 }
 
@@ -86,6 +98,10 @@ void main_procCreationOverhead()
     }
 
     cpu_results["Procedure Creation Overhead"] = measureProcCreate;
+
+    double stddev = calc_stddev(measureProcCreate);
+    cout<<"Procedure Creation Overhead Standard Deviation: " + to_string(stddev)<<endl;
+
     cout<<"Completed"<<endl;
 }
 
@@ -101,6 +117,10 @@ void main_threadCreationOverhead()
     }
 
     cpu_results["Kernel Thread Creation Overhead"] = measureThreadCreate;
+
+    double stddev = calc_stddev(measureThreadCreate);
+    cout<<"Kernel Thread Creation Overhead Standard Deviation: " + to_string(stddev)<<endl;
+
     cout<<"Completed"<<endl;
 }
 
@@ -109,7 +129,6 @@ void main_procCSOverhead()
     cout<<"Measure Process Context Switch Overhead"<<endl;
 
     static double mean_arr[10];
-    static double stddev_arr[10];
 
     for(int i = 0; i < 10; i++)
     {
@@ -120,6 +139,9 @@ void main_procCSOverhead()
     string mean_label = "Process Context Switch Overhead Means";
 
     cpu_results[mean_label] = mean_arr;
+
+    double stddev = calc_stddev(mean_arr);
+    cout<<"Process Context Switch Overhead Standard Deviation: " + to_string(stddev)<<endl;
 
     cout<<"Completed"<<endl;
 }
@@ -138,6 +160,10 @@ void main_threadCSOverhead()
 
     string label = "Thread Context Switch Overhead Means";
     cpu_results[label] = mean_arr;
+
+    double stddev = calc_stddev(mean_arr);
+    cout<<"Kernel Thread Context Switch Overhead Standard Deviation: " + to_string(stddev)<<endl;
+
     cout<<"Completed"<<endl;
 }
 

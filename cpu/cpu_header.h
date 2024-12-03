@@ -98,4 +98,31 @@ static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
     return ((double) (measureEnd - measureInit) / 3); // divide by processor frequency
 }
 
+/**
+ * Calc std dev
+ * 
+ * @param data input vector<double>
+ * @return double std dev value of vector
+ */
+static inline int calc_stddev(vector<double> data)
+{
+    double sum = 0.0;
+    double mean;
+    double stddev = 0.0;
+
+    for(int i = 0: i < data.size(); i++)
+    {
+        sum += data[i];
+    }
+
+    mean = sum / data.size();
+
+    for(int i = 0; i < data.size(); i++)
+    {
+        stddev += pow(arr[i] - mean, 2);
+    }
+
+    return sqrt(stddev / data.size());
+}
+
 #endif
