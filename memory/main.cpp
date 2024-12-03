@@ -66,17 +66,24 @@ void main_memoryPageFault()
     cout<<"Beginning memory page fault service test..."<<endl;
 
     double defTime = 0; // initialize variable to store total time taken
+    vector<double> times;
 
     for(int i = 0; i < 100; i++)
     {
         double curr_time = memory_pageFaultServTime();
         defTime += curr_time; // add current loop time to total
+        times.push_back(curr_time); // add curr loop to vector for std dev statistics
     }
 
     defTime /= 100; // average over 100 runs
 
     string header = "Memory Page Fault Service Average:"; //json key
     mem_results[header] = defTime; // add benchmark time to json file
+
+    cout<<header + " " + to_string(defTime)<<endl;
+
+    double stddev = calc_stddev(times);
+    cout<<"Memory Page Fault Service Standard Deviation: " + to_string(stddev)<<endl;
 
     cout<<"Completed memory page fault service test"<<endl;
 }

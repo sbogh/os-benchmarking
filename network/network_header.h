@@ -72,7 +72,7 @@ static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
  * @param data input vector<double>
  * @return double std dev value of vector
  */
-static inline int calc_stddev(vector<double> data)
+static inline double calc_stddev(vector<double> data)
 {
     double sum = 0.0;
     double mean;

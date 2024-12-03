@@ -102,4 +102,32 @@ static int get_fd(const char* file)
 
     return fd; // return file descriptor
 }
+
+/**
+ * Calc std dev
+ * 
+ * @param data input vector<double>
+ * @return double std dev value of vector
+ */
+static inline double calc_stddev(vector<double> data)
+{
+    double sum = 0.0;
+    double mean;
+    double stddev = 0.0;
+
+    for(int i = 0: i < data.size(); i++)
+    {
+        sum += data[i];
+    }
+
+    mean = sum / data.size();
+
+    for(int i = 0; i < data.size(); i++)
+    {
+        stddev += pow(arr[i] - mean, 2);
+    }
+
+    return sqrt(stddev / data.size());
+}
+
 #endif
