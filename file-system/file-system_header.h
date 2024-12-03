@@ -24,9 +24,6 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <string>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
 
 #pragma intrinsic(__rdtsc)
 using namespace std;

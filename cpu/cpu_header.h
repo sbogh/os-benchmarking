@@ -23,7 +23,7 @@
 
 #pragma intrinsic(__rdtsc)
 
-#define LOOP_COUNT 100000 // loop count variable for simple overheads
+#define LOOP_COUNT 1000000 // loop count variable for simple overheads
 #define CALL_COUNT 250 // call count variable for process and threads
 
 static int fd[2]; // global file descriptor

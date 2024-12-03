@@ -18,6 +18,7 @@ void main_readOverhead()
     for(int i = 0; i < 10; i++)
     {    
         measureReadOut[i] = measureReadOverhead();
+        cout<<"Read Overhead Iteration " + to_string(i) + " - " + to_string(measureReadOut[i])<<endl;
     }
 
     cpu_results["Read Overhead"] = measureReadOut;
@@ -32,6 +33,7 @@ void main_loopOverhead()
     for(int i = 0; i < 10; i++)
     {
         measureLoopOut[i] = measureLoopOverhead();
+        cout<<"Loop Overhead Iteration " + to_string(i) + " - " + to_string(measureLoopOut[i])<<endl;
     }
 
     cpu_results["Loop Overhead"] = measureLoopOut;
@@ -52,6 +54,7 @@ void main_procCallOverhead()
 
         string label = "Run " + to_string(i) + ": Procedure Call Overhead";
         cpu_results[label] = currArr;
+        cout<<label + " " + to_string(cpu_results[label])<<endl;
     }
     cout<<"Completed"<<endl;
 }
@@ -64,6 +67,7 @@ void main_systemCallOverhead()
     for(int i = 0; i < 10; i++)
     {
         measureLoopOut[i] = measureSystemCallOverhead();
+        cout<<"System Call Overhead Iteration " + to_string(i) + " - " + to_string(measureLoopOut[i])<<endl;
     }
 
     cpu_results["System Call Overhead"] = measureLoopOut;
@@ -78,6 +82,7 @@ void main_procCreationOverhead()
     for(int i = 0; i < 10; i++)
     {
         measureProcCreate[i] = measureProcessCreationOverhead();
+        cout<<"Procedure Creation Overhead Iteration " + to_string(i) + " - " + to_string(measureProcCreate[i])<<endl;
     }
 
     cpu_results["Procedure Creation Overhead"] = measureProcCreate;
@@ -92,6 +97,7 @@ void main_threadCreationOverhead()
     for(int i = 0; i < 10; i++)
     {
         measureThreadCreate[i] = kernelThreadCreationOverhead();
+        cout<<"Kernel Thread Creation Overhead Iteration " + to_string(i) + " - " + to_string(measureThreadCreate[i])<<endl;
     }
 
     cpu_results["Kernel Thread Creation Overhead"] = measureThreadCreate;
@@ -108,6 +114,7 @@ void main_procCSOverhead()
     for(int i = 0; i < 10; i++)
     {
         mean_arr[i] = processContextSwitch();
+        cout<<"Process Context Switch Overhead Iteration " + to_string(i) + " - " + to_string(mean_arr[i])<<endl;
     }
 
     string mean_label = "Process Context Switch Overhead Means";
@@ -126,6 +133,7 @@ void main_threadCSOverhead()
     for(int i = 0; i < 10; i++)
     {
         mean_arr[i] = threadContextSwitch();
+        cout<<"Kernel Thread Context Switch Overhead Iteration " + to_string(i) + " - " + to_string(mean_arr[i])<<endl;
     }
 
     string label = "Thread Context Switch Overhead Means";

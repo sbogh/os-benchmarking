@@ -44,7 +44,7 @@ void main_connectionOverhead_setup(int option)
         double setUpAvg = network_connectionOverhead_setup(SERVER_IP, PORT);
         cout<<"Connection Set Up Overhead - " + to_string(setUpAvg)<<endl;
     } else { // server
-        network_RTT_server(PORT);
+        network_connectionOverhead_server(PORT);
     }
 }
 
@@ -55,7 +55,7 @@ void main_connectionOverhead_teardown(int option)
         double tearDownAvg = network_connectionOverhead_teardown(SERVER_IP, PORT);
         cout<<"Connection Tear Down Overhead - " + to_string(tearDownAvg)<<endl;
     } else { // server
-        network_RTT_server(PORT);
+        network_connectionOverhead_server(PORT);
     }
 }
 

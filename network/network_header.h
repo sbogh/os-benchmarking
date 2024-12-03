@@ -67,27 +67,33 @@ static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
 }
 
 /**
- * Create socket
+ * Calc std dev
  * 
- * @return Unsigned 64-bit int of cycles
+ * @param data input vector<double>
+ * @return double std dev value of vector
  */
-static inline int createSocket()
+static inline int createSocket(vector<double> data)
 {
-    return socket(AF_INET, SOCK_STREAM, 0);
+    double sum = 0.0;
+    double mean;
+    double stddev = 0.0;
+
+    for(int i = 0: i < data.size(); i++)
+    {
+        sum += data[i];
+    }
+
+    mean = sum / data.size();
+
+    for(int i = 0; i < data.size(); i++)
+    {
+        stddev += pow(arr[i] - mean, 2);
+    }
+
+    return sqrt(stddev / data.size());
 }
 
-/**
- * Assign socket fields
- * @return socketAddr struct
- */
-static inline sockaddr_in assignSocketFields(sockaddr_in socket, string connection, string port)
-{
-    socket.sin_family = AF_INET;
-    //socket.sin_addr.s_addr = inet_addr(connection);
-    //socket.sin_port = htons(atoi(port));
 
-    return socket;
-}
 
 
 #endif

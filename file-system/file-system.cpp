@@ -47,9 +47,14 @@ Total Functions:
 - Contention
 */
 
+/**
+ * File Systems Operation 1: File System Cache Size
+ * @param 
+ * @return 
+*/
 double fs_cacheSize()
 {
-
+    
 }
 
 double fs_localReadTime_sequential()

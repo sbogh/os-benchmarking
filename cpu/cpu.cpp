@@ -25,10 +25,10 @@ double measureReadOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        total = total + (measureEnd - measureInit); // add current loop time to total
+        total += cyclesToTime(measureInit, measureEnd); // add current loop time to total (ns)
     }
 
-    return ((double) total / double(LOOP_COUNT)); // average time per loop
+    return ((double) total / double(LOOP_COUNT)); // average time per loop (ns)
 }
 
 /**
@@ -38,7 +38,7 @@ double measureReadOverhead()
  */
 double measureLoopOverhead()
 {
-    double total = 0; // total overhead ticks
+    double total; // total overhead ticks
 
     uint64_t measureInit; // init start time var
     uint64_t measureEnd; // init end time var
@@ -55,9 +55,9 @@ double measureLoopOverhead()
     measureEnd = getTime(); // read end time
     getCPUID(); // implement serialization
 
-    total = total + (measureEnd - measureInit); // assign count to var
+    total = cyclesToTime(measureInit, measureEnd); // add curr (ns)
 
-    return ((double) total / (double) LOOP_COUNT); // return the average time per loop
+    return ((double) total / (double) LOOP_COUNT); // return the average time per loop (ns)
 }
 
 /**
@@ -83,9 +83,9 @@ double* measureProcedureCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        loop_total = loop_total + (measureEnd - measureInit); // add loop time to total
+        loop_total += cyclesToTime(measureInit, measureEnd); // add loop time to total (ns)
     }
-    retArr[0] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    retArr[0] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr (ns)
 
     // one variable procedure
     loop_total = 0; // reset loop total
@@ -98,9 +98,9 @@ double* measureProcedureCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        loop_total = loop_total + (measureEnd - measureInit); // add loop time to total
+        loop_total += cyclesToTime(measureInit, measureEnd); // add loop time to total (ns)
     }
-    retArr[1] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    retArr[1] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr (ns)
 
     // two variable procedure
     loop_total = 0; // reset loop total
@@ -113,9 +113,9 @@ double* measureProcedureCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        loop_total = loop_total + (measureEnd - measureInit); // add loop time to total
+        loop_total += cyclesToTime(measureInit, measureEnd); // add loop time to total (ns)
     }
-    retArr[2] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    retArr[2] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr (ns)
 
     // three variable procedure
     loop_total = 0; // reset loop total
@@ -128,9 +128,9 @@ double* measureProcedureCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        loop_total = loop_total + (measureEnd - measureInit); // add loop time to total
+        loop_total += cyclesToTime(measureInit, measureEnd); // add loop time to total (ns)
     }
-    retArr[3] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    retArr[3] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr (ns)
 
     // four variable procedure
     loop_total = 0; // reset loop total
@@ -143,9 +143,9 @@ double* measureProcedureCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        loop_total = loop_total + (measureEnd - measureInit); // add loop total to total
+        loop_total += cyclesToTime(measureInit, measureEnd); // add loop total to total (ns)
     }
-    retArr[4] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    retArr[4] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr (ns)
 
     // five variable procedure
     loop_total = 0; // reset loop total
@@ -158,9 +158,9 @@ double* measureProcedureCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        loop_total = loop_total + (measureEnd - measureInit); // add loop total to total
+        loop_total += cyclesToTime(measureInit, measureEnd); // add loop total to total (ns)
     }
-    retArr[5] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    retArr[5] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr (ns)
 
     // six variable procedure
     loop_total = 0; // reset loop total
@@ -173,9 +173,9 @@ double* measureProcedureCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        loop_total = loop_total + (measureEnd - measureInit); // add loop total to total
+        loop_total += cyclesToTime(measureInit, measureEnd); // add loop total to total (ns)
     }
-    retArr[6] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    retArr[6] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr (ns)
 
     // seven variable procedure
     loop_total = 0; // reset loop total
@@ -188,11 +188,11 @@ double* measureProcedureCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        loop_total = loop_total + (measureEnd - measureInit); // add loop total to total
+        loop_total += cyclesToTime(measureInit, measureEnd); // add loop total to total (ns)
     }
-    retArr[7] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr
+    retArr[7] = ((double) loop_total / (double) LOOP_COUNT); // add time average to retArr (ns)
     
-    return retArr; // return array of average time per loop for functions with 0-7 variables
+    return retArr; // return array of average time (ns) per loop for functions with 0-7 variables
 }
 
 /**
@@ -218,10 +218,10 @@ double measureSystemCallOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        total = total + (measureEnd - measureInit); // add count to total
+        total += cyclesToTime(measureInit, measureEnd); // add count to total (ns)
     }
 
-    return ((double) total / (double) CALL_COUNT); // return average time per loop
+    return ((double) total / (double) CALL_COUNT); // return average time per loop (ns)
 }
 
 /**
@@ -256,11 +256,11 @@ double measureProcessCreationOverhead()
             measureEnd = getTime(); // read end time
             getCPUID(); // implement serialization
 
-            total = total + (measureEnd - measureInit); // add loop time to total
+            total += cyclesToTime(measureInit, measureEnd); // add loop time to total (ns)
         }
     }
 
-    return ((double) total / (double) CALL_COUNT); // return average time per loop
+    return ((double) total / (double) CALL_COUNT); // return average time per loop (ns)
 }
 
 /**
@@ -287,10 +287,10 @@ double kernelThreadCreationOverhead()
         measureEnd = getTime(); // read end time
         getCPUID(); // implement serialization
 
-        total = total + (measureEnd - measureInit); // add loop time to total time
+        total += cyclesToTime(measureInit, measureEnd); // add loop time to total time (ns)
     }
 
-    return ((double) total / (double) CALL_COUNT); // return average time per loop
+    return ((double) total / (double) CALL_COUNT); // return average time per loop (ns)
 }
 
 /*
@@ -347,7 +347,7 @@ double processContextSwitch()
             exit(1); // exit call
         }
 
-        double loopTotal = (measureEnd > measureInit) ? (measureEnd - measureInit) : 0; // if diff > 0 assign val otherwise assign 0
+        double loopTotal = (measureEnd > measureInit) ? cyclesToTime(measureInit, measureEnd) : 0; // if diff > 0 assign val otherwise assign 0
 
         // if val not 0 add to total and increment
         if (loopTotal != 0)
@@ -358,7 +358,7 @@ double processContextSwitch()
         }
     }
 
-    return ((double) total / (double) CALL_COUNT); // return average time per loop
+    return ((double) total / (double) CALL_COUNT); // return average time per loop (ns)
 }
 
 /**
@@ -385,7 +385,7 @@ double threadContextSwitch()
         pthread_join(threadID, NULL); // join thread
         read(fd[0], (void*) &measureEnd, sizeVal); // read call given file descriptor, buffer, and size
 
-        double loopTotal = (measureEnd > measureInit) ? (measureEnd - measureInit) : 0; // assign diff of timestamp, if < 0 assign 0
+        double loopTotal = (measureEnd > measureInit) ? cyclesToTime(measureInit, measureEnd) : 0; // assign diff of timestamp, if < 0 assign 0
 
         // check if current loop output is valid and increment if it is (diff not equal to 0 meaning > 0)
         if (loopTotal != 0)
@@ -396,5 +396,5 @@ double threadContextSwitch()
         }
     }
 
-    return ((double) total / (double) CALL_COUNT); // return the array of context switch values
+    return ((double) total / (double) CALL_COUNT); // return the array of context switch values (ns)
 }

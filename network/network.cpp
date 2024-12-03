@@ -47,11 +47,11 @@ void network_RTT_server(int port)
         - Send/recv
     */
 
-    int socketFD, clientLen;
+    int socketFD, client_len;
     struct sockaddr_in server, client;
     char dummyMsg;
 
-    clientLen = sizeof(struct sockaddr_in);
+    client_len = sizeof(struct sockaddr_in);
 
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
@@ -71,7 +71,7 @@ void network_RTT_server(int port)
     int listenStatus = listen(socketFD, 5);
     // handle listenStatus != 0
 
-    int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) clientLen);
+    int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) &client_len);
     // handle connectionFD == -1
 
     while(true)
@@ -343,7 +343,6 @@ double network_connectionOverhead_teardown(string connection, int port)
     - In for loop
         - init socket
         - connect
-        - set socket behavior (linger)
         - close
         - repeat
     */
@@ -366,9 +365,6 @@ double network_connectionOverhead_teardown(string connection, int port)
         socketFD = socket(PF_INET, SOCK_STREAM, 0);
 
         connectionStatus = connect(socketFD, (struct sockaddr *) &server, sizeof(server));
-
-        struct linger settings = {1, 10};
-        setsockopt(socketFD, SOL_SOCKET, SO_LINGER, &settings, sizeof(settings));
 
         getCPUID();
         measureInit = getTime();
