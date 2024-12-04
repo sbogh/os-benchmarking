@@ -115,7 +115,7 @@ static inline double calc_stddev(vector<double> data)
     double mean;
     double stddev = 0.0;
 
-    for(int i = 0: i < data.size(); i++)
+    for(int i = 0; i < data.size(); i++)
     {
         sum += data[i];
     }
@@ -124,7 +124,7 @@ static inline double calc_stddev(vector<double> data)
 
     for(int i = 0; i < data.size(); i++)
     {
-        stddev += pow(arr[i] - mean, 2);
+        stddev += pow(data[i] - mean, 2);
     }
 
     return sqrt(stddev / data.size());

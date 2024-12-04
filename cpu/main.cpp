@@ -13,12 +13,12 @@ json cpu_results; // initialize json structure
 void main_readOverhead()
 {
     cout<<"Measure Read Overhead"<<endl;
-    double measureReadOut[10];
+    vector<double> measureReadOut;
 
     for(int i = 0; i < 10; i++)
     {    
-        measureReadOut[i] = measureReadOverhead();
-        cout<<"Read Overhead Iteration " + to_string(i) + " - " + to_string(measureReadOut[i])<<endl;
+        measureReadOut.push_back(measureReadOverhead());
+        cout<<"Read Overhead Iteration " + to_string(i) + " - " + to_string(measureReadOut.back())<<endl;
     }
 
     cpu_results["Read Overhead"] = measureReadOut;
@@ -32,12 +32,12 @@ void main_readOverhead()
 void main_loopOverhead()
 {
     cout<<"Measure Loop Overhead"<<endl;
-    double measureLoopOut[10];
+    vector<double> measureLoopOut;
 
     for(int i = 0; i < 10; i++)
     {
-        measureLoopOut[i] = measureLoopOverhead();
-        cout<<"Loop Overhead Iteration " + to_string(i) + " - " + to_string(measureLoopOut[i])<<endl;
+        measureLoopOut.push_back(measureLoopOverhead());
+        cout<<"Loop Overhead Iteration " + to_string(i) + " - " + to_string(measureLoopOut.back())<<endl;
     }
 
     cpu_results["Loop Overhead"] = measureLoopOut;
@@ -54,10 +54,11 @@ void main_procCallOverhead()
     for(int i = 0; i < 10; i++)
     {
         double* currArrPointer = measureProcedureCallOverhead();
-        double currArr[8];
+        vector<double> currArr;
         for(int arrIter = 0; arrIter < 8; arrIter++)
         {
-            currArr[arrIter] = currArrPointer[arrIter];
+            currArr.push_back(currArrPointer[arrIter]);
+            cout<<to_string(arrIter) + " # of Vars - Procedure Call Overhead: " + to_string(currArr.back())<<endl;
         }
 
         string label = "Run " + to_string(i) + ": Procedure Call Overhead";
@@ -70,12 +71,12 @@ void main_procCallOverhead()
 void main_systemCallOverhead()
 {
     cout<<"Measure System Call Overhead"<<endl;
-    double measureLoopOut[10];
+    vector<double> measureLoopOut;
 
     for(int i = 0; i < 10; i++)
     {
-        measureLoopOut[i] = measureSystemCallOverhead();
-        cout<<"System Call Overhead Iteration " + to_string(i) + " - " + to_string(measureLoopOut[i])<<endl;
+        measureLoopOut.push_back(measureSystemCallOverhead());
+        cout<<"System Call Overhead Iteration " + to_string(i) + " - " + to_string(measureLoopOut.back())<<endl;
     }
 
     cpu_results["System Call Overhead"] = measureLoopOut;
@@ -89,12 +90,12 @@ void main_systemCallOverhead()
 void main_procCreationOverhead()
 {
     cout<<"Measure Procedure Creation Overhead"<<endl;
-    double measureProcCreate[10];
+    vector<double> measureProcCreate;
 
     for(int i = 0; i < 10; i++)
     {
-        measureProcCreate[i] = measureProcessCreationOverhead();
-        cout<<"Procedure Creation Overhead Iteration " + to_string(i) + " - " + to_string(measureProcCreate[i])<<endl;
+        measureProcCreate.push_back(measureProcessCreationOverhead());
+        cout<<"Procedure Creation Overhead Iteration " + to_string(i) + " - " + to_string(measureProcCreate.back())<<endl;
     }
 
     cpu_results["Procedure Creation Overhead"] = measureProcCreate;
@@ -108,12 +109,12 @@ void main_procCreationOverhead()
 void main_threadCreationOverhead()
 {
     cout<<"Measure Kernel Thread Creation Overhead"<<endl;
-    double measureThreadCreate[10];
+    vector<double> measureThreadCreate;
 
     for(int i = 0; i < 10; i++)
     {
-        measureThreadCreate[i] = kernelThreadCreationOverhead();
-        cout<<"Kernel Thread Creation Overhead Iteration " + to_string(i) + " - " + to_string(measureThreadCreate[i])<<endl;
+        measureThreadCreate.push_back(kernelThreadCreationOverhead());
+        cout<<"Kernel Thread Creation Overhead Iteration " + to_string(i) + " - " + to_string(measureThreadCreate.back())<<endl;
     }
 
     cpu_results["Kernel Thread Creation Overhead"] = measureThreadCreate;
@@ -128,12 +129,12 @@ void main_procCSOverhead()
 {
     cout<<"Measure Process Context Switch Overhead"<<endl;
 
-    static double mean_arr[10];
+    vector<double> mean_arr;
 
     for(int i = 0; i < 10; i++)
     {
-        mean_arr[i] = processContextSwitch();
-        cout<<"Process Context Switch Overhead Iteration " + to_string(i) + " - " + to_string(mean_arr[i])<<endl;
+        mean_arr.push_back(processContextSwitch());
+        cout<<"Process Context Switch Overhead Iteration " + to_string(i) + " - " + to_string(mean_arr.back())<<endl;
     }
 
     string mean_label = "Process Context Switch Overhead Means";
@@ -150,12 +151,12 @@ void main_threadCSOverhead()
 {
     cout<<"Measure Kernel Thread Context Switch Overhead"<<endl;
 
-    double mean_arr[10];
+    vector<double> mean_arr;
 
     for(int i = 0; i < 10; i++)
     {
-        mean_arr[i] = threadContextSwitch();
-        cout<<"Kernel Thread Context Switch Overhead Iteration " + to_string(i) + " - " + to_string(mean_arr[i])<<endl;
+        mean_arr.push_back(threadContextSwitch());
+        cout<<"Kernel Thread Context Switch Overhead Iteration " + to_string(i) + " - " + to_string(mean_arr.back())<<endl;
     }
 
     string label = "Thread Context Switch Overhead Means";
