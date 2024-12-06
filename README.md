@@ -1,6 +1,6 @@
 # How to Run CPU Benchmark
 
-The files in this repository will operate in groups. The CPU operations are grouped and run through the main.cpp file. To run the benchmarks compile this file using the following in your command line:
+The files in this repository will operate in groups. The sets of operations are grouped and run through the main.cpp file in each folder. To run the benchmarks compile this file using the following in your command line:
 ```
 g++ main.cpp -o main
 ```
