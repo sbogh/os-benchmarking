@@ -36,9 +36,16 @@ using namespace std;
 #define CACHE_LINE 64 // cache line size
 #define BUFFER_SIZE 1024*1024
 vector<long int> cacheFileSizes = {128000000, 256000000, 512000000, 1024000000, 1500000000, 2000000000, 3000000000}; // create files of size 128 MB to 3 GB (ideally at 2048 MB (RAM size) should see jump)
-vector<string> fileNames = {"file128.txt", "file256.txt", "file512.txt", "file1000.txt", "file1500.txt", "file2000.txt", "file3000.txt"};
-vector<int> readFileSizes = {2000000, 4000000, 8000000, 16000000, 32000000, 64000000, 128000000}; // file sizes for read access
+vector<string> cacheFileNames = {"file128.txt", "file256.txt", "file512.txt", "file1000.txt", "file1500.txt", "file2000.txt", "file3000.txt"};
+vector<string> remoteCacheFileNames = {"../../../../../../mnt/remoteAccess/file128.txt", "../../../../../../mnt/remoteAccess/file256.txt", "../../../../../../mnt/remoteAccess/file512.txt", "../../../../../../mnt/remoteAccess/file1000.txt", "../../../../../../mnt/remoteAccess/file1500.txt", "../../../../../../mnt/remoteAccess/file2000.txt", "../../../../../../mnt/remoteAccess/file3000.txt"};
 #define BLOCK 4096
+
+vector<long int> readFileSizes = {2000000, 4000000, 8000000, 16000000, 32000000, 64000000};
+vector<string> readFileNames = {"file2.txt", "file4.txt", "file8.txt", "file8.txt", "file16.txt", "file32.txt", "file64.txt"};
+
+string localPath = "file1000.txt"; // file for contention
+string localPath_child = "file1000_child.txt"; // file for contention children
+
 
 /**
  * Get CPU ID to implement serialization

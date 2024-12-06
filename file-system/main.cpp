@@ -23,32 +23,43 @@ void main_cacheSize()
     }
 }
 
-void main_readTime_sequential(string path, int size)
+void main_readTime_sequential(int remLoc)
 {
-    double total = 0;
-
-    for(int i = 0; i < 10; i++)
+    if(remLoc == 0) //local
     {
-        total += fs_readTime_sequential(path, size);
+        vector<string> path = 
     }
+    for(long int size : readFileSizes)
+    {
+        double total = 0;
 
-    total /= 10;
+        for(int i = 0; i < 10; i++)
+        {
+            total += fs_readTime_sequential(path, size);
+        }
 
-    cout<<"Sequential Read Time: " + to_string(total)<<endl;
+        total /= 10;
+
+        cout<<"File Size: " + to_string(size) + "Sequential Read Time: " + to_string(total)<<endl;
+    }
+    
 }
 
-void main_readTime_random(string path, int size)
+void main_readTime_random()
 {
-    double total = 0;
-
-    for(int i = 0; i < 10; i++)
+    for(long int size : cacheFileSizes) // for set of file sizes
     {
-        total += fs_readTime_random(path, size);
-    }
+        double total = 0;
 
-    total /= 10;
+        for(int i = 0; i < 10; i++)
+        {
+            total += fs_readTime_random(path, size);
+        }
 
-    cout<<"Sequential Read Time: " + to_string(total)<<endl;
+        total /= 10;
+
+        cout<<"File Size: " + to_string(size) + "Random Read Time: " + to_string(total)<<endl;
+    } 
 }
 
 void main_contention(string path, string child_path)
@@ -56,12 +67,12 @@ void main_contention(string path, string child_path)
     fs_contention(path, child_path);
 }
 
-void main_makeFiles()
+void main_makeFiles(vector<string> fileNames, vector<long int> fileSizes)
 {
     int counter = 0;
     for(string name : fileNames)
     {
-        fs_createFile(name, cacheFileSizes[counter]);
+        fs_createFile(name, fileSizes[counter]);
         counter += 1;
     }
 
@@ -69,30 +80,27 @@ void main_makeFiles()
 
 int main()
 {
-    //string localPath = XXX; // FILL
-    //string remotePath = XXX; //FILL
-    //int size = XXX; // FILL BASED ON FILE CHOSEN
-
-    //string childPath = XXX; // FILL
-
-    // Make files
-    main_makeFiles();
+    // Make files for cache size operation
+    main_makeFiles(cacheFileNames, cacheFileSizes);
     
     // Cache Size
     main_cacheSize();
 
+    // Make files for read operations
+    main_makeFiles(readFileNames, readFileSizes);
+
     // READ TIME SEQUENTIAL LOCAL
-    main_readTime_sequential(localPath, size);
+    main_readTime_sequential();
 
     // READ TIME RANDOM ACCESS LOCAL
-    main_readTime_random(localPath, size);
+    main_readTime_random();
 
     // READ TIME SEQUENTIAL REMOTE
-    main_readTime_sequential(remotePath, size);
+    main_readTime_sequential();
 
     // READ TIME RANDOM ACCESS REMOTE
-    main_readTime_random(remotePath, size);
+    main_readTime_random();
 
     // CONTENTION
-    main_contention(localPath);
+    main_contention(localPath, localPath_child);
 }
