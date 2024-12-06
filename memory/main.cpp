@@ -19,7 +19,7 @@ void main_memoryAccess()
         double latency_avg = 0;
         for(int j = 0; j < MEM_ACCESS_COUNT; j++)
         {
-            double latency_curr = memory_accessTime(i); // get access latency for specified array size
+            double latency_curr = memory_accessTime_LL(i); // get access latency for specified array size
             latency_avg += latency_curr;
         }
         
@@ -41,7 +41,7 @@ void main_memoryBW_Write()
 
         string header = "Memory Write Bandwidth: " + to_string(i) + " bytes"; // json key
         mem_results[header] = curr_bw; // store latency in json
-        cout<<"Completed" + header + " - " + to_string(curr_bw)<<endl;
+        cout<<"Completed " + header + " - " + to_string(curr_bw)<<endl;
     }
     cout<<"Completed memory write bandwidth test"<<endl;
 
@@ -56,7 +56,7 @@ void main_memoryBW_Read()
 
         string header = "Memory Read Bandwidth: " + to_string(i) + " bytes"; // json key
         mem_results[header] = curr_bw; // store latency in json
-        cout<<"Completed" + header + " - " + to_string(curr_bw)<<endl;
+        cout<<"Completed " + header + " - " + to_string(curr_bw)<<endl;
     }
     cout<<"Completed memory write bandwidth test"<<endl;
 }

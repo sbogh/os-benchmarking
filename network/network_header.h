@@ -93,7 +93,4 @@ static inline double calc_stddev(vector<double> data)
     return sqrt(stddev / data.size());
 }
 
-
-
-
 #endif

@@ -31,6 +31,9 @@ using namespace std;
 #define CALL_COUNT 250 // call count variable for process and threads
 
 static int fd[2]; // global file descriptor
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; // mutex
+static pthread_cond_t cond = PTHREAD_COND_INITIALIZER; // condition
+static int ready = 0; // condition var
 
 /**
  * Get CPU ID to implement serialization
@@ -81,13 +84,22 @@ static inline void* arbFunc(void* arg)
  */
 static inline void *threadCSFunc(void *)
 {
-    uint64_t measureInit; // init start variable
+    uint64_t measureEnd; // init start variable
+
+    pthread_mutex_lock(&mutex); // lock
+    
+    // check condition to see if ready for child
+    while(!ready)
+    {
+        pthread_cond_wait(&cond, &mutex);
+    }
+    pthread_mutex_unlock(&mutex); // unlock
 
     getCPUID(); // implement serialization
-    measureInit = getTime(); // read start time
+    measureEnd = getTime(); // read start time
     int sizeVal = sizeof(uint64_t); // init and assign value for size
 
-    write(fd[1], (void*) &measureInit, sizeVal); // write call given file descriptor, buffer, and size
+    write(fd[1], &measureEnd, sizeVal); // write call given file descriptor, buffer, and size
 
     pthread_exit(NULL); // exit thread
 }

@@ -78,7 +78,7 @@ double memory_accessTime(int size)
 
     double clockTime = cyclesToTime(measureInit, measureEnd); // convert time from cycles to ns
     
-    return ((double) time / (double) arraySize); // return average time per access
+    return ((double) clockTime / (double) arraySize); // return average time per access
 }
 
 /**
@@ -93,8 +93,8 @@ double memory_accessTime_LL(int size)
     uint64_t measureInit;
     uint64_t measureEnd;
 
-    Vector<Node> linkedList(size); // initialize vector of size with structure Node
-    Vector<Node*> pointers(size); // initialize vector to store pointers to Linked List Nodes
+    vector<Node> linkedList(size); // initialize vector of size with structure Node
+    vector<Node*> pointers(size); // initialize vector to store pointers to Linked List Nodes
 
     // for loop to assign the address of Linked List node to a pointer in the pointers list
     for(int i = 0; i < size; i++)
@@ -117,7 +117,7 @@ double memory_accessTime_LL(int size)
     Node* temp = head; // create a pointer that points to head
 
     // get timestamp
-    CPUID(); // force serialization
+    getCPUID(); // force serialization
     measureInit = getTime(); // get start time
 
     // access every Node in the entire Linked List
@@ -128,7 +128,7 @@ double memory_accessTime_LL(int size)
 
     // get timestamp
     measureEnd = getTime(); // get end time
-    CPUID(); // force serialization
+    getCPUID(); // force serialization
 
     double clock_time = cyclesToTime(measureInit, measureEnd); // convert time from cycles to ns
 

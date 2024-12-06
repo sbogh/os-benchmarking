@@ -370,7 +370,8 @@ double threadContextSwitch()
 {
     static double retArr[CALL_COUNT]; // init return array with overhead array
     double total = 0; // init total
-    for(int i = 0; i < CALL_COUNT;)
+    
+    for(int i = 0; i < CALL_COUNT; i++)
     {
         uint64_t measureInit, measureEnd; //init timestamp vars
         int sizeVal = sizeof(uint64_t); // init size value to pass to read()
@@ -378,22 +379,24 @@ double threadContextSwitch()
         pthread_t threadID; // init thread
 
         pipe(fd); // open pipe
+
+        ready = 0; // reset condition var so child cannot be started early
+
         pthread_create(&threadID, NULL, threadCSFunc, NULL); // create thread given thread and routine
+
+        pthread_mutex_lock(&mutex); // lock
 
         getCPUID(); // implement serialization
         measureInit = getTime(); // get start time
+
+        ready = 1;
+        pthread_cond_signal(&cond);
+        pthread_mutex_unlock(&mutex); // unlock
+
         pthread_join(threadID, NULL); // join thread
         read(fd[0], (void*) &measureEnd, sizeVal); // read call given file descriptor, buffer, and size
 
-        double loopTotal = (measureEnd > measureInit) ? cyclesToTime(measureInit, measureEnd) : 0; // assign diff of timestamp, if < 0 assign 0
-
-        // check if current loop output is valid and increment if it is (diff not equal to 0 meaning > 0)
-        if (loopTotal != 0)
-        {
-            retArr[i] = loopTotal; // assign loop val to array index i
-            total = total + loopTotal; // add loop total to total
-            i++; // increment loop counter
-        }
+       total += cyclesToTime(measureInit, measureEnd);
     }
 
     return ((double) total / (double) CALL_COUNT); // return the array of context switch values (ns)

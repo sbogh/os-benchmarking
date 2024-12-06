@@ -47,42 +47,44 @@ void network_RTT_server(int port)
         - Send/recv
     */
 
+    // initialize socket, server, client, and dummy message
     int socketFD, client_len;
     struct sockaddr_in server, client;
     char dummyMsg;
 
-    client_len = sizeof(struct sockaddr_in);
+    client_len = sizeof(struct sockaddr_in); // init client length
 
+    // init time measurement vars
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
 
+    // initialize socket FD
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
-    // handle error socketFD == -1
 
+    // fill server address with null vals
     bzero(&server, sizeof(server));
 
+    // initialize server info
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(port);
 
+    // bind socket to server
     int bindStatus = bind(socketFD, (struct sockaddr *) &server, sizeof(server));
-    // handle bindStatus != 0
 
+    // listen on socket
     int listenStatus = listen(socketFD, 5);
-    // handle listenStatus != 0
 
+    // accept requests
     int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) &client_len);
-    // handle connectionFD == -1
 
     while(true)
     {
-        int recvStatus = recv(connectionFD, &dummyMsg, sizeof(dummyMsg), 0);
-        // handle receive error?
-        int sendStatus = send(connectionFD, &dummyMsg, sizeof(dummyMsg), 0);
-        // handle send error?
+        recv(connectionFD, &dummyMsg, sizeof(dummyMsg), 0); // receive from connection dummy msg
+        send(connectionFD, &dummyMsg, sizeof(dummyMsg), 0); // echo back dummy msg
     }
 
-    close(socketFD);
+    close(socketFD); // close socket
 }
 
 /**
@@ -100,44 +102,45 @@ double network_RTT_client(string connection, int port)
         - Send/recv
     */
 
+    // initialize socket, server, client, and dummy message
     int socketFD;
     struct sockaddr_in server, client;
     char dummyMsg = 'a';
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
 
-
+    // init socket
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
-    // handle error socketFD == -1
+
+    // fill server addr with null vals
     bzero(&server, sizeof(server));
 
+    // initialize server info
     server.sin_family = AF_INET;   
     inet_pton(AF_INET, connection.c_str(), &server.sin_addr.s_addr);
-    // handle error?
     server.sin_port = htons(port);
 
     int connectionStatus = connect(socketFD, (struct sockaddr *) &server, sizeof(server));
-    // handle connectionStatus error
 
     for(int i = 0; i < LOOP_COUNT; i++)
     {
-        getCPUID();
-        measureInit = getTime();
+        // get start time
+        getCPUID(); // serialization
+        measureInit = getTime(); // get start time
 
-        send(socketFD, &dummyMsg, sizeof(dummyMsg), 0);
-        // handle send error?
-        recv(socketFD, &dummyMsg, sizeof(dummyMsg), 0);
-        // handle receive error?
+        send(socketFD, &dummyMsg, sizeof(dummyMsg), 0); // send packet
+        recv(socketFD, &dummyMsg, sizeof(dummyMsg), 0); // receive echoed packet back
 
-        measureEnd = getTime();
-        getCPUID();
+        // get end time
+        measureEnd = getTime(); // get end time
+        getCPUID(); // serialization
 
-        totalTime += cyclesToTime(measureInit, measureEnd);
+        totalTime += cyclesToTime(measureInit, measureEnd); // convert time from cycles to ns and add to total time
     }
 
-    close(socketFD);
+    close(socketFD); // close socket
 
-    return ((double) totalTime / (double) LOOP_COUNT);
+    return ((double) totalTime / (double) LOOP_COUNT); // return averaged time
 }
 
 /**
@@ -156,51 +159,47 @@ void network_peakBW_server(int port)
         - recv
     */
 
+    // initialize socket, server, client, and dummy message
     int socketFD;
     struct sockaddr_in server, client;
     char* recMsg = new char[BANDWIDTH_BENCHMARK_SIZE];
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
 
+    // fill server addr with null vals
     bzero(&server, sizeof(server));
 
+    // init server info
     server.sin_family = AF_INET;   
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(port);
 
+    // init socket
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
-    // handle error socketFD == -1
-    int opt = 1;
-    setsockopt(socketFD, SOL_SOCKET, SO_KEEPALIVE | SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
-    int buffer_size = 1000*1000*250;
-    setsockopt(socketFD, SOL_SOCKET, SO_SNDBUF, &buffer_size, sizeof(buffer_size));
-    setsockopt(socketFD, SOL_SOCKET, SO_RCVBUF, &buffer_size, sizeof(buffer_size));
 
+    // bind socket
     int bindStatus = bind(socketFD, (struct sockaddr *) &server, sizeof(server));
-    // handle bindStatus != 0
 
+    // listen for connections
     int listenStatus = listen(socketFD, 5);
-    // handle listenStatus != 0
 
+    // accept connections
     int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) sizeof(client));
-    // if using multithreading need to accept multiple
-    // handle connectionFD == -1
 
     while(true)
     {
-        recv(socketFD, &recMsg, BANDWIDTH_BENCHMARK_SIZE, MSG_WAITALL);
-        // handle receive error?
+        //recv(socketFD, &recMsg, BANDWIDTH_BENCHMARK_SIZE, MSG_WAITALL);
+        read(connectionFD, &recMsg, BANDWIDTH_BENCHMARK_SIZE); // receive packets
     }
 
-    close(socketFD);
+    close(socketFD); // close socket
 }
 
 /**
  * Network Operation 2: Client Side
  * @return double bandwidth value averaged over runs
  */
-// multithread this if need to hit higher bandwidth
-vector<double> network_peakBW_client(string connection, int port)
+double network_peakBW_client(string connection, int port)
 {
     /*
     - Init socket
@@ -212,74 +211,59 @@ vector<double> network_peakBW_client(string connection, int port)
         - measure time
     - bytes / time BW
     */
+    // initialize socket, server, client, and send msg and set val of msg
     int socketFD;
     struct sockaddr_in server, client;
     char* sendMsg = new char[BANDWIDTH_BENCHMARK_SIZE];
     memset(sendMsg, 'a', sizeof(sendMsg));
 
+    // initialize time measurement vars
     uint64_t measureInit, measureEnd;
     uint64_t totalUploadTime = 0;
-    uint64_t totalDownloadTime = 0;
     uint64_t totalUploadBytes = 0;
-    uint64_t totalDownloadBytes = 0;
 
+    // set server addr to null vals
     bzero(&server, sizeof(server));
 
+    // init server info
     server.sin_family = AF_INET;   
     inet_pton(AF_INET, connection.c_str(), &server.sin_addr.s_addr);
-    // handle error?
     server.sin_port = htons(port);
 
+    // init socket
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
-    // handle error socketFD == -1
 
+    // init connection
     int connectionFD = connect(socketFD, (struct sockaddr *) &server, sizeof(server));
-    // handle connectionFD == -1
 
     for(int i = 0; i < BW_LOOP_COUNT; i++)
     {
-        getCPUID();
-        measureInit = getTime();
+        // get start time
+        getCPUID(); // serialization
+        measureInit = getTime(); // get start time
 
-        totalUploadBytes += send(socketFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
-        // handle receive error?
+        //totalUploadBytes += send(socketFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
+        totalUploadBytes += write(connectionFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE);
 
-        measureEnd = getTime();
-        getCPUID();
+        // get end time
+        measureEnd = getTime(); // get end time
+        getCPUID(); // serialization
 
-        totalUploadTime += cyclesToTime(measureInit, measureEnd);
-
-        // Fix to measure receive separately
-        getCPUID();
-        measureInit = getTime();
-
-        totalDownloadBytes += recv(socketFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0);
-        // handle receive error?
-
-        measureEnd = getTime();
-        getCPUID();
-
-        totalDownloadTime += cyclesToTime(measureInit, measureEnd);
+        totalUploadTime += cyclesToTime(measureInit, measureEnd); // convert time to ns and append to total time
     }
 
-    close(socketFD);
+    close(socketFD); // close socket
 
     // bytes to MB for download and upload
-    totalDownloadBytes = totalDownloadBytes / pow(1000, 2); // bytes to MB
     totalUploadBytes = totalUploadBytes / pow(1000, 2); // bytes to MB
 
     // ns to seconds for download and upload time
-    totalDownloadTime = totalDownloadTime / pow(1000, 3); // ns to seconds
     totalUploadTime = totalUploadTime / pow(1000, 3); // ns to seconds
 
     // calculate bandwidths for upload and download
     double uploadBW = (double) totalUploadBytes / (double) totalUploadTime;
-    double downloadBW = (double) totalDownloadBytes / (double) totalDownloadTime;
 
-    // place values in vector
-    vector<double> bandwidths = {uploadBW, downloadBW};
-
-    return bandwidths; // return upload and download peak bandwidths
+    return uploadBW; // return upload and download peak bandwidths
 }
 
 
@@ -300,33 +284,40 @@ double network_connectionOverhead_setup(string connection, int port)
         - close
         - repeat
     */
+
+    // init time vars, connection FD, server
     uint64_t measureInit, measureEnd;
     int connectionStatus;
     uint64_t totalTime = 0;
-
     struct sockaddr_in server;
+
+    // set server address to null vals
+    bzero(&server, sizeof(server));
+
+    // init server info
     server.sin_family = AF_INET;
     inet_pton(AF_INET, connection.c_str(), &server.sin_addr.s_addr);
-    // handle error?
     server.sin_port = htons(port);
 
     for(int i = 0; i < LOOP_COUNT; i++)
     {
-        int socketFD = socket(PF_INET, SOCK_STREAM, 0);
+        int socketFD = socket(PF_INET, SOCK_STREAM, 0); // open socket
 
-        getCPUID();
-        measureInit = getTime();
+        // start time
+        getCPUID(); // serialization
+        measureInit = getTime(); // get start time
 
-        connectionStatus = connect(socketFD, (struct sockaddr *) &server, sizeof(server));
+        connectionStatus = connect(socketFD, (struct sockaddr *) &server, sizeof(server)); // connect to server
 
-        measureEnd = getTime();
-        getCPUID();
+        // end time
+        measureEnd = getTime(); // get end time
+        getCPUID(); // serialization
 
-        totalTime += cyclesToTime(measureInit, measureEnd);
-        close(socketFD);
+        totalTime += cyclesToTime(measureInit, measureEnd); // convert time to ns and add to total time
+        close(socketFD); // close socket
     }
 
-    return ((double) totalTime / (double) LOOP_COUNT);
+    return ((double) totalTime / (double) LOOP_COUNT); // return averaged time (ns)
 }
 
 
@@ -346,38 +337,43 @@ double network_connectionOverhead_teardown(string connection, int port)
         - close
         - repeat
     */
+    // init socket, time vars, server
     int socketFD;
     uint64_t measureInit, measureEnd;
     int connectionStatus;
     uint64_t totalTime = 0;
-
     struct sockaddr_in server;
 
+    // fill server addr with null vals
     bzero(&server, sizeof(server));
 
+    // init server info
     server.sin_family = AF_INET;
     inet_pton(AF_INET, connection.c_str(), &server.sin_addr.s_addr);
-    // handle error?
     server.sin_port = htons(port);
 
     for(int i = 0; i < LOOP_COUNT; i++)
     {
-        socketFD = socket(PF_INET, SOCK_STREAM, 0);
+        socketFD = socket(PF_INET, SOCK_STREAM, 0); // open socket
 
-        connectionStatus = connect(socketFD, (struct sockaddr *) &server, sizeof(server));
+        connectionStatus = connect(socketFD, (struct sockaddr *) &server, sizeof(server)); // connect
 
-        getCPUID();
-        measureInit = getTime();
+        send(socketFD, &sendMsg, BANDWIDTH_BENCHMARK_SIZE, 0); // ensure that connection is established
 
-        close(socketFD);
+        // start time
+        getCPUID(); // serialization
+        measureInit = getTime(); // get start time
 
-        measureEnd = getTime();
-        getCPUID();
+        close(socketFD); // close socket
 
-        totalTime += cyclesToTime(measureInit, measureEnd);
+        // end time
+        measureEnd = getTime(); // get end time
+        getCPUID(); // serialization
+
+        totalTime += cyclesToTime(measureInit, measureEnd); // convert time to ns and add to total time
     }
 
-    return ((double) totalTime / (double) LOOP_COUNT);
+    return ((double) totalTime / (double) LOOP_COUNT); // return averaged time
 }
 
 /**
@@ -397,33 +393,37 @@ void network_connectionOverhead_server(int port)
         - Send/recv
     */
 
+    // init socket, server, client, dummy msg
     int socketFD;
     struct sockaddr_in server, client;
     char dummyMsg;
 
+    // init time vars
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
 
+    // open socket
     socketFD = socket(AF_INET, SOCK_STREAM, 0);
-    // handle error socketFD == -1
 
+    // fill server addr with null vals
     bzero(&server, sizeof(server));
 
+    // init server info
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(port);
 
+    // bind socket
     int bindStatus = bind(socketFD, (struct sockaddr *) &server, sizeof(server));
-    // handle bindStatus != 0
 
+    // listen for connections
     int listenStatus = listen(socketFD, 5);
-    // handle listenStatus != 0
 
     while(true)
     {
+        // accept connections
         int connectionFD = accept(socketFD, (struct sockaddr *) &client, (socklen_t *) sizeof(client));
-        // handle connectionFD == -1
     }
 
-    close(socketFD);
+    close(socketFD); // close socket
 }
