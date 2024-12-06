@@ -41,7 +41,8 @@ vector<string> remoteCacheFileNames = {"../../../../../../mnt/remoteAccess/file1
 #define BLOCK 4096
 
 vector<long int> readFileSizes = {2000000, 4000000, 8000000, 16000000, 32000000, 64000000};
-vector<string> readFileNames = {"file2.txt", "file4.txt", "file8.txt", "file8.txt", "file16.txt", "file32.txt", "file64.txt"};
+vector<string> readFileNames = {"file2.txt", "file4.txt", "file8.txt", "file16.txt", "file32.txt", "file64.txt"};
+vector<string> remoteFileNames = {"../../../../../../mnt/remoteAccess/file2.txt", "../../../../../../mnt/remoteAccess/file4.txt", "../../../../../../mnt/remoteAccess/file8.txt", "../../../../../../mnt/remoteAccess/file16.txt", "../../../../../../mnt/remoteAccess/file32.txt", "../../../../../../mnt/remoteAccess/file64.txt"};
 
 string localPath = "file1000.txt"; // file for contention
 string localPath_child = "file1000_child.txt"; // file for contention children

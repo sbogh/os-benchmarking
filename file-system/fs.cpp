@@ -63,7 +63,7 @@ vector<double> fs_cacheSize()
         uint64_t measureInit, measureEnd;
         uint64_t totalTime = 0;
 
-        string filename = fileNames[counter]; // get the filename
+        string filename = cacheFileNames[counter]; // get the filename
 
         //fs_createFile(filename, size); // create file
         void* dummy = malloc(BLOCK); // dummy buffer
@@ -171,7 +171,7 @@ double fs_readTime_random(string path, long int size)
 
     void * dummy = malloc(BLOCK); // allocate buffer
 
-    int fd = open(path, O_SYNC); // open file
+    int fd = open(path.c_str(), O_SYNC); // open file
     posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED); // set no caching
 
     int loopParam = size / BLOCK; // loop param for the number of blocks to access

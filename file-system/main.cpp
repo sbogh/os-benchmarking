@@ -25,40 +25,56 @@ void main_cacheSize()
 
 void main_readTime_sequential(int remLoc)
 {
+    vector<string> path;
     if(remLoc == 0) //local
     {
-        vector<string> path = 
+        path = readFileNames;
+    } else{ // remote
+        path = remoteFileNames;
     }
+    
+    int counter = 0;
     for(long int size : readFileSizes)
     {
         double total = 0;
 
         for(int i = 0; i < 10; i++)
         {
-            total += fs_readTime_sequential(path, size);
+            total += fs_readTime_sequential(path[counter], size);
         }
 
         total /= 10;
 
         cout<<"File Size: " + to_string(size) + "Sequential Read Time: " + to_string(total)<<endl;
+        counter += 1;
     }
     
 }
 
-void main_readTime_random()
+void main_readTime_random(int remLoc)
 {
+    vector<string> path;
+    if(remLoc == 0) //local
+    {
+        path = readFileNames;
+    } else{ // remote
+        path = remoteFileNames;
+    }
+
+    int counter = 0;
     for(long int size : cacheFileSizes) // for set of file sizes
     {
         double total = 0;
 
         for(int i = 0; i < 10; i++)
         {
-            total += fs_readTime_random(path, size);
+            total += fs_readTime_random(path[counter], size);
         }
 
         total /= 10;
 
         cout<<"File Size: " + to_string(size) + "Random Read Time: " + to_string(total)<<endl;
+        counter += 1;
     } 
 }
 
@@ -80,6 +96,8 @@ void main_makeFiles(vector<string> fileNames, vector<long int> fileSizes)
 
 int main()
 {
+    int remLoc = 0; // set to 0 for local, 1 for remote
+
     // Make files for cache size operation
     main_makeFiles(cacheFileNames, cacheFileSizes);
     
