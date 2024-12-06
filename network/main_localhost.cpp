@@ -29,9 +29,8 @@ void main_peakBW(int option)
 {
     if(option == 1) // client
     {
-        vector<double> bandwidths = network_peakBW_client(SERVER_IP, PORT);
-        cout<<"Peak Upload Bandwidth - " + to_string(bandwidths[0])<<endl;
-        cout<<"Peak Download Bandwidth - " + to_string(bandwidths[1])<<endl;
+        double bandwidth = network_peakBW_client(SERVER_IP, PORT);
+        cout<<"Peak Bandwidth - " + to_string(bandwidth)<<endl;
     } else { // server
         network_peakBW_server(PORT);
     }

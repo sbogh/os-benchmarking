@@ -24,6 +24,10 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <string>
+#include <algorithm>
+#include <fcntl.h>
+#include <thread>
+#include <chrono>
 
 #pragma intrinsic(__rdtsc)
 using namespace std;
@@ -31,9 +35,9 @@ using namespace std;
 #define LOOP_COUNT 1000000 // num loops
 #define CACHE_LINE 64 // cache line size
 #define BUFFER_SIZE 1024*1024
-vector<int> cacheFileSizes = {128000000, 256000000, 512000000, 1024000000, 1500000000, 2000000000, 3000000000}; // create files of size 128 MB to 3 GB (ideally at 2048 MB (RAM size) should see jump)
-vector<string> fileNames = {"file128.txt", "file256.txt", "file512.txt", "file1000.txt", "file1500.txt", "file2000.txt", "file3000.txt"}
-vector<int> readFileSizes = {2000000, 4000000, 8000000, 16000000, 32000000, 64000000, 128000000} // file sizes for read access
+vector<long int> cacheFileSizes = {128000000, 256000000, 512000000, 1024000000, 1500000000, 2000000000, 3000000000}; // create files of size 128 MB to 3 GB (ideally at 2048 MB (RAM size) should see jump)
+vector<string> fileNames = {"file128.txt", "file256.txt", "file512.txt", "file1000.txt", "file1500.txt", "file2000.txt", "file3000.txt"};
+vector<int> readFileSizes = {2000000, 4000000, 8000000, 16000000, 32000000, 64000000, 128000000}; // file sizes for read access
 #define BLOCK 4096
 
 /**
@@ -70,10 +74,9 @@ static double cyclesToTime(uint64_t measureInit, uint64_t measureEnd)
  * 
  * @return Unsigned 64-bit int of cycles
  */
-void fs_createFile(const string &filename, size_t size)
+void fs_createFile(string filename, size_t size)
 {
-    ofstream file;
-    file(filename, std::ios::binary);
+    ofstream file(filename, std::ios::binary);
 
     vector<char> buffer(BUFFER_SIZE, 'a');
 
@@ -81,14 +84,12 @@ void fs_createFile(const string &filename, size_t size)
 
     while(totalSize > 0)
     {
-        size_t batch = min(BUFFER_SIZE, totalSize);
+        size_t batch = std::min((size_t) BUFFER_SIZE, totalSize);
         file.write(buffer.data(), batch);
         totalSize -= batch;
     }
 
     file.close();
-
-    return;
 }
 
 #endif

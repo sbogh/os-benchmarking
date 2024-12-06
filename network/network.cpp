@@ -344,6 +344,8 @@ double network_connectionOverhead_teardown(string connection, int port)
     uint64_t totalTime = 0;
     struct sockaddr_in server;
 
+    char* sendMsg = new char[BANDWIDTH_BENCHMARK_SIZE]; // init dummy msg
+
     // fill server addr with null vals
     bzero(&server, sizeof(server));
 

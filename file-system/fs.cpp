@@ -54,134 +54,171 @@ using namespace std;
 */
 vector<double> fs_cacheSize()
 {
-    vector<double> times;
+    vector<double> times; // list of run times
 
     int counter = 0;
-    for(auto size : cacheFileSizes) // for each file size
+    for(long int size : cacheFileSizes) // for each file size
     {
+        // init time vars
         uint64_t measureInit, measureEnd;
         uint64_t totalTime = 0;
 
-        string filename = fileNames[counter]
+        string filename = fileNames[counter]; // get the filename
 
-        fs_createFile(filename, size); // create file
+        //fs_createFile(filename, size); // create file
         void* dummy = malloc(BLOCK); // dummy buffer
 
-        int fd = open(filename, O_RDONLY | O_SYNC);
 
-        lseek(fd, size - 1, SEEK_SET);
-        int readBytes = 0;
+        // Read file into cache first
+        int fd = open(filename.c_str(), O_RDONLY | O_SYNC); // open file
 
+        lseek(fd, size - 1, SEEK_SET); // pointer to the end of file
+        long int readBytes = 0; // how many bytes have been read
+
+        // while the entire file has not been read
         while(readBytes < size)
         {
-            lseek(fd, -2 * BLOCK, SEEK_CUR);
-            size_t readAmount = read(fd, dummy, BLOCK);
+            lseek(fd, -2 * BLOCK, SEEK_CUR); // step backwards from end of file
+            long int readAmount = read(fd, dummy, BLOCK);
             readBytes += readAmount;
         }
 
         close(fd);
 
-        fd = open(filename, O_RDONLY | O_SYNC);
+        
+        // Measured run where the file is guaranteed to be in cache
+        fd = open(filename.c_str(), O_RDONLY | O_SYNC); // open file
 
-        lseek(fd, size - 1, SEEK_SET);
-        int readBytes = 0;
+        lseek(fd, size - 1, SEEK_SET); // pointer to the end of file
+        readBytes = 0; // how many bytes have been read
 
+        // while the entire file has not been read
         while(readBytes < size)
         {
-            lseek(fd, -2 * BLOCK, SEEK_CUR);
+            lseek(fd, -2 * BLOCK, SEEK_CUR); // step backwards from end of file to start
+
             // get start time
             getCPUID(); // serialization
             measureInit = getTime(); // start time
 
-            size_t readAmount = read(fd, dummy, BLOCK);
+            size_t readAmount = read(fd, dummy, BLOCK); // number of bytes read in
 
             // get end time
             measureEnd = getTime(); // end time
             getCPUID(); // serialization
 
-            readBytes += readAmount;
-            totalTime += cyclesToTime(measureInit, measureEnd);
+            readBytes += readAmount; // add read bytes
+            totalTime += cyclesToTime(measureInit, measureEnd); // add cycle run
         }
         
-        times.push_back(totalTime / (size / BLOCK));
-        free(dummy);
-        counter += 1;
+        times.push_back(totalTime / (size / BLOCK)); // add averaged time to vector
+        free(dummy); // free buffer
+        counter += 1; // increment counter for filename
     }
 
-    return times;
+    return times; // return time vectors
 }
 
-double fs_readTime_sequential(string path, int size)
+/**
+ * File Systems Operation 2-a: File System Sequential Read
+ * @param path the path to file
+ * @param size the size of file
+ * @return a double for the average sequential access
+*/
+double fs_readTime_sequential(string path, long int size)
 {
+    // init time vars
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
-    void * dummy = malloc(BLOCK);
+
+    void * dummy = malloc(BLOCK); // allocate buffer of one block size
 
 
-    int fd = open(path, O_SYNC);
-    fcntl(fd, F_NOCACHE, 1);
+    int fd = open(path.c_str(), O_SYNC); // open file
+    posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED); // enable no caching
 
+    // while the read is occurring
     while(read(fd, dummy, BLOCK) > 0)
     {
-        getCPUID();
-        measureInit = getTime();
+        // get start time
+        getCPUID(); // serialization
+        measureInit = getTime(); // get start time
 
-        read(fd, dummy, BLOCK);
+        read(fd, dummy, BLOCK); // read data
 
-        measureEnd = getTime();
-        getCPUID();
+        measureEnd = getTime(); // get end time
+        getCPUID(); // serialization
 
-        totalTime += cyclesToTime(measureInit, measureEnd);
+        totalTime += cyclesToTime(measureInit, measureEnd); // add current loop to total
     }
 
-    close(fd);
+    close(fd); // close file
 
     return totalTime / (((double) size / BLOCK) * 1000); // return us
 }
 
-double fs_readTime_random(string path)
+/**
+ * File Systems Operation 2-b: File System Random Read
+ * @param path the path to file
+ * @param size the size of file
+ * @return a double for average random access
+*/
+double fs_readTime_random(string path, long int size)
 {
+    // init time vars
     uint64_t measureInit, measureEnd;
     uint64_t totalTime = 0;
-    void * dummy = malloc(BLOCK);
 
+    void * dummy = malloc(BLOCK); // allocate buffer
 
-    int fd = open(path, O_SYNC);
-    fcntl(fd, F_NOCACHE, 1);
+    int fd = open(path, O_SYNC); // open file
+    posix_fadvise(fd, 0, 0, POSIX_FADV_DONTNEED); // set no caching
 
-    int loopParam = size / BLOCK;
+    int loopParam = size / BLOCK; // loop param for the number of blocks to access
 
     for(int i = 0; i < loopParam; i++)
     {
-        int randAcc = rand() % loopParam;
+        int randAcc = rand() % loopParam; // get random location
 
-        getCPUID();
-        measureInit = getTime();
+        // get start time
+        getCPUID(); // serialization
+        measureInit = getTime(); // start time
 
-        lseek(fd, randAcc * BLOCK, SEEK_SET);
-        read(fd, dummy, BLOCK);
+        lseek(fd, randAcc * BLOCK, SEEK_SET); // find location
+        read(fd, dummy, BLOCK); // read
 
-        measureEnd = getTime();
-        getCPUID();
+        // get end time
+        measureEnd = getTime(); // end time
+        getCPUID(); // serialization
 
-        totalTime += cyclesToTime(measureInit, measureEnd);
+        totalTime += cyclesToTime(measureInit, measureEnd); // add current loop time to total time
     }
 
-    close(fd);
+    close(fd); // close file
+    free(dummy); // free buffer
 
     return totalTime / (((double) size / BLOCK) * 1000); // return us
 }
 
+/**
+ * File Systems Operation 2-c: File System Contention - HELPER
+ * @param path the path to file
+ * @param child_path the path to child process file
+ * @param num the number of processes
+ * @return a double for the average times for number of processes
+*/
 double fs_helper_create(string path, string child_path, int num)
 {
-    int procID = 1;
-    void * dummy = malloc(BLOCK);
-    uint64_t measureInit, measureEnd;
+    int procID = 1; // set pid
+    void * dummy = malloc(BLOCK); // allocate buffer
+    uint64_t measureInit, measureEnd; // init time vars
 
+    // for the number of processes we want to make
     for(int i = 0; i < num; i++)
     {
-        procID = fork();
+        procID = fork(); // fork the process
 
+        // if we are in the child
         if(procID == 0)
         {
             this_thread::sleep_for(chrono::nanoseconds(500));
@@ -189,52 +226,62 @@ double fs_helper_create(string path, string child_path, int num)
         }
     }
 
+    // get file location
     string fileLoc;
     if(procID == 0) // child
     {
-        fileLoc = filename + "_child.txt";
+        fileLoc = child_path;
     } else { // parent
-        fileLoc = filename + ".txt";
+        fileLoc = path;
     }
 
-    int file = open(fileLoc.c_str(), O_DIRECT);
+    int file = open(fileLoc.c_str(), O_DIRECT); // open file
 
-    getCPUID();
-    measureInit = getTime();
+    // get start time
+    getCPUID(); // serialization
+    measureInit = getTime(); // start time
 
+    // read many times
     for(int j = 0; j < LOOP_COUNT; j++)
     {
-        lseek(file, BLOCK, SEEK_CUR);
-        read(file, dummy, BLOCK);
+        lseek(file, BLOCK, SEEK_CUR); // seek location
+        read(file, dummy, BLOCK); // read from location
     }
 
-    measureEnd = getTime();
-    getCPUID();
+    // get end time
+    measureEnd = getTime(); // end time
+    getCPUID(); // serialization
 
-    free(dummy);
-    close(file);
+    free(dummy); // free buffer
+    close(file); // close file
 
+    // if child exit
     if(procID == 0)
     {
         exit(0);
     }
 
-    return cyclesToTime(measureInit, measureEnd) / LOOP_COUNT;
+    return cyclesToTime(measureInit, measureEnd) / LOOP_COUNT; // return the loop count
 }
 
-double fs_contention(string path, string child_path)
+/**
+ * File Systems Operation 2-c: File System Contention
+ * @param path the path to file
+ * @param child_path the path to child process file
+*/
+void fs_contention(string path, string child_path)
 {
     for(int i = 0; i < 40; i++) // number of processes
     {
-        double total = 0;
+        double total = 0; // total of time
 
         for(int j = 0; j < 10; j++) // number of runs
         {
-            total += fs_helper_create(path, child_path, i);
+            total += fs_helper_create(path, child_path, i); // add run to total time
         }
 
         total /= 10; // average over runs
 
-        cout<<"# of Processes: " + to_string(i) + total + " sec/block"<<endl;
+        cout<<"# of Processes: " + to_string(i) + " " + to_string(total) + " sec/block"<<endl;
     }
 }

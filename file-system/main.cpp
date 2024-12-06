@@ -1,4 +1,4 @@
-#include "file-system.cpp"
+#include "fs.cpp"
 /* 
 * @file main.cpp
 * @author Shayan Boghani
@@ -16,9 +16,9 @@ void main_cacheSize()
     vector<double> accessTimes = fs_cacheSize();
 
     int counter = 0;
-    for(auto time : accessTimes)
+    for(double time : accessTimes)
     {
-        cout<<"File Size: " + to_string(fileSizes[counter]) + " - " + to_string(time)<<endl;
+        cout<<"File Size: " + to_string(cacheFileSizes[counter]) + " - " + to_string(time)<<endl;
         counter += 1;
     }
 }
@@ -51,15 +51,15 @@ void main_readTime_random(string path, int size)
     cout<<"Sequential Read Time: " + to_string(total)<<endl;
 }
 
-void main_contention(string path)
+void main_contention(string path, string child_path)
 {
-    fs_contention(path);
+    fs_contention(path, child_path);
 }
 
 void main_makeFiles()
 {
-    counter = 0;
-    for(auto name : fileNames)
+    int counter = 0;
+    for(string name : fileNames)
     {
         fs_createFile(name, cacheFileSizes[counter]);
         counter += 1;
