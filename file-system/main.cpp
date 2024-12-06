@@ -108,16 +108,16 @@ int main()
     main_makeFiles(readFileNames, readFileSizes);
 
     // READ TIME SEQUENTIAL LOCAL
-    main_readTime_sequential();
+    main_readTime_sequential(remLoc);
 
     // READ TIME RANDOM ACCESS LOCAL
-    main_readTime_random();
+    main_readTime_random(remLoc);
 
     // READ TIME SEQUENTIAL REMOTE
-    main_readTime_sequential();
+    main_readTime_sequential(remLoc);
 
     // READ TIME RANDOM ACCESS REMOTE
-    main_readTime_random();
+    main_readTime_random(remLoc);
 
     // CONTENTION
     main_contention(localPath, localPath_child);
