@@ -1,15 +1,12 @@
-# How to Run Benchmarks (by group)
+# OS Benchmarking Project 
 
-The files in this repository will operate in groups. For each operation, navigate to its respective folder and run the following in your command line:
-```
-g++ main.cpp -o main
-```
-Then, run the compiled file using:
-```
-./main
-```
+## Project Overview
+This goal of this project was to perform benchmarking tasks on various aspects of an operating system. This includes the CPU, file system, memory, and networking interfaces.
 
-For CPU Operations: To run analysis on the outputted data in the json file, run the Python file using the following:
-```
-python out_analysis.py
-```
+The implementation for the tests can be found in each labeled directory, and the results can be found in the report linked [here](https://github.com/sbogh/cse221-benchmarking/blob/main/Boghani_CSE221_FinalProjectReport.pdf).
+
+## Project Specifications
+These particular benchmarks were designed for a system running on a VirtualBox VM. This VM was running Linux Mint 22 Xfce Edition and was allocated limited hardware resources which are detailed in the full report. For networking, two identical virtual machines were set up as the server and client.
+
+## How to Run Benchmarks
+See the instructions document found [here](https://github.com/sbogh/cse221-benchmarking/blob/main/Instructions.md).
